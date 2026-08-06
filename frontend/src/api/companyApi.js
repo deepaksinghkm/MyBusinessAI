@@ -13,3 +13,17 @@ export const updateCompany = (id, data) =>
 
 export const deleteCompany = (id) =>
   api.delete(`/companies/${id}`);
+export const uploadCompanyLogo = (id, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return api.post(
+    `/companies/${id}/logo`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+};
