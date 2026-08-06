@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Grid,
   TextField,
@@ -8,7 +8,11 @@ import {
   Box,
   MenuItem,
 } from "@mui/material";
-import { createCompany } from "../../api/companyApi";
+
+import {
+  createCompany,
+  updateCompany,
+} from "../../api/companyApi";
 
 const businessTypes = [
   "Manufacturer",
@@ -39,8 +43,23 @@ const initialFormData = {
   currency: "INR",
 };
 
-export default function CompanyForm({ onSaved }) {
+export default function CompanyForm({
+  onSaved,
+  selectedCompany,
+}) {
   const [formData, setFormData] = useState(initialFormData);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedCompany) {
+      setFormData({
+        ...initialFormData,
+        ...selectedCompany,
+      });
+    } else {
+      setFormData(initialFormData);
+    }
+  }, [selectedCompany]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -51,6 +70,8 @@ export default function CompanyForm({ onSaved }) {
 
   const handleSave = async () => {
     try {
+      setLoading(true);
+
       const payload = Object.fromEntries(
         Object.entries(formData).map(([key, value]) => [
           key,
@@ -58,9 +79,13 @@ export default function CompanyForm({ onSaved }) {
         ])
       );
 
-      await createCompany(payload);
-
-      alert("Company Saved Successfully");
+      if (selectedCompany) {
+        await updateCompany(selectedCompany.id, payload);
+        alert("Company Updated Successfully");
+      } else {
+        await createCompany(payload);
+        alert("Company Saved Successfully");
+      }
 
       setFormData(initialFormData);
 
@@ -70,18 +95,23 @@ export default function CompanyForm({ onSaved }) {
     } catch (error) {
       console.error(error.response?.data || error);
       alert("Unable to save company");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
       <Typography variant="h5" fontWeight="bold">
-        Company Master
+        {selectedCompany
+          ? "Edit Company"
+          : "Company Master"}
       </Typography>
 
       <Divider sx={{ my: 2 }} />
 
       <Grid container spacing={2}>
+
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
@@ -172,8 +202,7 @@ export default function CompanyForm({ onSaved }) {
             onChange={handleChange}
           />
         </Grid>
-
-        <Grid item xs={12}>
+                <Grid item xs={12}>
           <TextField
             fullWidth
             multiline
@@ -251,17 +280,42 @@ export default function CompanyForm({ onSaved }) {
             onChange={handleChange}
           />
         </Grid>
+
       </Grid>
 
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
+
         <Button
           variant="contained"
           size="large"
+          disabled={loading}
           onClick={handleSave}
         >
-          Save Company
+          {loading
+            ? "Saving..."
+            : selectedCompany
+            ? "Update Company"
+            : "Save Company"}
         </Button>
+
+        {selectedCompany && (
+          <Button
+            variant="outlined"
+            size="large"
+            color="secondary"
+            onClick={() => {
+              setFormData(initialFormData);
+              if (onSaved) {
+                onSaved();
+              }
+            }}
+          >
+            Cancel
+          </Button>
+        )}
+
       </Box>
+
     </>
   );
 }

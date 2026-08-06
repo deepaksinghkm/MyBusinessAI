@@ -5,6 +5,11 @@ import {
   TextField,
   Button,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 
 import {
@@ -18,6 +23,7 @@ export default function CompanyTable({
 }) {
   const [rows, setRows] = useState([]);
   const [search, setSearch] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     loadCompanies();
@@ -32,17 +38,17 @@ export default function CompanyTable({
     }
   };
 
-  const handleDelete = async (id) => {
-    const ok = window.confirm(
-      "Delete this company?"
-    );
+  const openDeleteDialog = (id) => {
+    setDeleteId(id);
+  };
 
-    if (!ok) return;
-
+  const confirmDelete = async () => {
     try {
-      await deleteCompany(id);
+      await deleteCompany(deleteId);
 
       alert("Company deleted successfully");
+
+      setDeleteId(null);
 
       loadCompanies();
     } catch (err) {
@@ -90,23 +96,23 @@ export default function CompanyTable({
       field: "mobile",
       headerName: "Mobile",
       flex: 1,
-      minWidth: 120,
+      minWidth: 130,
     },
     {
       field: "actions",
       headerName: "Actions",
       width: 220,
       sortable: false,
-
       renderCell: (params) => (
-        <Stack
-          direction="row"
-          spacing={1}
-        >
+        <Stack direction="row" spacing={1}>
           <Button
             variant="contained"
             size="small"
-            onClick={() => onEdit(params.row)}
+            onClick={() => {
+              if (onEdit) {
+                onEdit(params.row);
+              }
+            }}
           >
             Edit
           </Button>
@@ -116,7 +122,7 @@ export default function CompanyTable({
             color="error"
             size="small"
             onClick={() =>
-              handleDelete(params.row.id)
+              openDeleteDialog(params.row.id)
             }
           >
             Delete
@@ -155,6 +161,38 @@ export default function CompanyTable({
           disableRowSelectionOnClick
         />
       </Box>
+
+      <Dialog
+        open={deleteId !== null}
+        onClose={() => setDeleteId(null)}
+      >
+        <DialogTitle>
+          Delete Company
+        </DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this
+            company?
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteId(null)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={confirmDelete}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </Box>
   );
