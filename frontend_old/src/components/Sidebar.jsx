@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
+
 import {
   Drawer,
+  Toolbar,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
 } from "@mui/material";
 
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
@@ -14,11 +15,12 @@ import BrandingWatermarkRoundedIcon from "@mui/icons-material/BrandingWatermarkR
 import CategoryRoundedIcon from "@mui/icons-material/CategoryRounded";
 import PaletteRoundedIcon from "@mui/icons-material/PaletteRounded";
 import StraightenRoundedIcon from "@mui/icons-material/StraightenRounded";
+import SquareFootRoundedIcon from "@mui/icons-material/SquareFootRounded";
 import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 
 const drawerWidth = 240;
 
-const menuItems = [
+const menus = [
   {
     text: "Dashboard",
     icon: <DashboardRoundedIcon />,
@@ -50,6 +52,11 @@ const menuItems = [
     path: "/sizes",
   },
   {
+    text: "Unit",
+    icon: <SquareFootRoundedIcon />,
+    path: "/units",
+  },
+  {
     text: "Products",
     icon: <Inventory2RoundedIcon />,
     path: "/products",
@@ -74,16 +81,20 @@ export default function Sidebar() {
       <Toolbar />
 
       <List>
-        {menuItems.map((item) => (
+        {menus.map((menu) => (
           <ListItemButton
-            key={item.text}
+            key={menu.path}
             component={Link}
-            to={item.path}
-            selected={location.pathname === item.path}
+            to={menu.path}
+            selected={location.pathname === menu.path}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemIcon>
+              {menu.icon}
+            </ListItemIcon>
 
-            <ListItemText primary={item.text} />
+            <ListItemText
+              primary={menu.text}
+            />
           </ListItemButton>
         ))}
       </List>

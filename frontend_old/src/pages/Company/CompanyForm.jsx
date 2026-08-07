@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import {
+  Box,
   Grid,
   TextField,
   Button,
   Typography,
   Divider,
-  Box,
-  MenuItem,
 } from "@mui/material";
 
 import {
@@ -14,16 +13,7 @@ import {
   updateCompany,
 } from "../../api/companyApi";
 
-const businessTypes = [
-  "Manufacturer",
-  "Wholesaler",
-  "Distributor",
-  "Retailer",
-  "Importer",
-  "Exporter",
-];
-
-const initialFormData = {
+const initialForm = {
   company_name: "",
   legal_name: "",
   brand_name: "",
@@ -38,26 +28,23 @@ const initialFormData = {
   state: "",
   country: "India",
   pincode: "",
-  business_type: "Manufacturer",
-  financial_year: "2026-27",
-  currency: "INR",
 };
 
 export default function CompanyForm({
-  onSaved,
   selectedCompany,
+  onSaved,
 }) {
-  const [formData, setFormData] = useState(initialFormData);
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] =
+    useState(initialForm);
 
   useEffect(() => {
     if (selectedCompany) {
       setFormData({
-        ...initialFormData,
+        ...initialForm,
         ...selectedCompany,
       });
     } else {
-      setFormData(initialFormData);
+      setFormData(initialForm);
     }
   }, [selectedCompany]);
 
@@ -68,44 +55,38 @@ export default function CompanyForm({
     }));
   };
 
-  const handleSave = async () => {
+  const handleSubmit = async () => {
     try {
-      setLoading(true);
-
-      const payload = Object.fromEntries(
-        Object.entries(formData).map(([key, value]) => [
-          key,
-          value === "" ? null : value,
-        ])
-      );
-
       if (selectedCompany) {
-        await updateCompany(selectedCompany.id, payload);
+        await updateCompany(
+          selectedCompany.id,
+          formData
+        );
         alert("Company Updated Successfully");
       } else {
-        await createCompany(payload);
+        await createCompany(formData);
         alert("Company Saved Successfully");
       }
 
-      setFormData(initialFormData);
+      setFormData(initialForm);
 
       if (onSaved) {
         onSaved();
       }
-    } catch (error) {
-      console.error(error.response?.data || error);
+    } catch (err) {
+      console.error(err);
       alert("Unable to save company");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <>
-      <Typography variant="h5" fontWeight="bold">
-        {selectedCompany
-          ? "Edit Company"
-          : "Company Master"}
+    <Box>
+
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+      >
+        Company Master
       </Typography>
 
       <Divider sx={{ my: 2 }} />
@@ -185,7 +166,6 @@ export default function CompanyForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
-            type="email"
             label="Email"
             name="email"
             value={formData.email}
@@ -202,11 +182,12 @@ export default function CompanyForm({
             onChange={handleChange}
           />
         </Grid>
-                <Grid item xs={12}>
+
+        <Grid item xs={12}>
           <TextField
             fullWidth
             multiline
-            rows={2}
+            rows={3}
             label="Address"
             name="address1"
             value={formData.address1}
@@ -214,7 +195,7 @@ export default function CompanyForm({
           />
         </Grid>
 
-        <Grid item xs={4}>
+        <Grid item xs={12} md={4}>
           <TextField
             fullWidth
             label="City"
@@ -224,7 +205,7 @@ export default function CompanyForm({
           />
         </Grid>
 
-        <Grid item xs={4}>
+        <Grid item xs={12} md={4}>
           <TextField
             fullWidth
             label="State"
@@ -234,7 +215,7 @@ export default function CompanyForm({
           />
         </Grid>
 
-        <Grid item xs={4}>
+        <Grid item xs={12} md={4}>
           <TextField
             fullWidth
             label="PIN Code"
@@ -244,78 +225,19 @@ export default function CompanyForm({
           />
         </Grid>
 
-        <Grid item xs={6}>
-          <TextField
-            select
-            fullWidth
-            label="Business Type"
-            name="business_type"
-            value={formData.business_type}
-            onChange={handleChange}
-          >
-            {businessTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-
-        <Grid item xs={3}>
-          <TextField
-            fullWidth
-            label="Financial Year"
-            name="financial_year"
-            value={formData.financial_year}
-            onChange={handleChange}
-          />
-        </Grid>
-
-        <Grid item xs={3}>
-          <TextField
-            fullWidth
-            label="Currency"
-            name="currency"
-            value={formData.currency}
-            onChange={handleChange}
-          />
-        </Grid>
-
       </Grid>
 
-      <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
-
+      <Box sx={{ mt: 3 }}>
         <Button
           variant="contained"
-          size="large"
-          disabled={loading}
-          onClick={handleSave}
+          onClick={handleSubmit}
         >
-          {loading
-            ? "Saving..."
-            : selectedCompany
+          {selectedCompany
             ? "Update Company"
             : "Save Company"}
         </Button>
-
-        {selectedCompany && (
-          <Button
-            variant="outlined"
-            size="large"
-            color="secondary"
-            onClick={() => {
-              setFormData(initialFormData);
-              if (onSaved) {
-                onSaved();
-              }
-            }}
-          >
-            Cancel
-          </Button>
-        )}
-
       </Box>
 
-    </>
+    </Box>
   );
 }

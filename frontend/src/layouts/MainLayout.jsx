@@ -1,32 +1,22 @@
-import { Box, Toolbar } from "@mui/material";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
+import Box from "@mui/material/Box";
 
-export default function MainLayout({ children }) {
+import Header from "../components/Header/Header";
+import Desktop from "../components/Desktop/Desktop";
+import Taskbar from "../components/Taskbar/Taskbar";
+
+export default function MainLayout() {
   return (
-    <Box sx={{ display: "flex" }}>
-
+    <Box
+      sx={{
+        width: "100%",
+        height: "100vh",
+      }}
+    >
       <Header />
 
-      <Sidebar />
+      <Desktop />
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          backgroundColor: "#f4f6f9",
-          minHeight: "100vh",
-          ml: "250px",
-        }}
-      >
-        <Toolbar />
-
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-
-      </Box>
-
+      <Taskbar />
     </Box>
   );
 }

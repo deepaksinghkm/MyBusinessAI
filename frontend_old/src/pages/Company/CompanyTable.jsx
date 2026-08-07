@@ -5,11 +5,6 @@ import {
   TextField,
   Button,
   Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 
 import {
@@ -23,7 +18,6 @@ export default function CompanyTable({
 }) {
   const [rows, setRows] = useState([]);
   const [search, setSearch] = useState("");
-  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     loadCompanies();
@@ -38,18 +32,14 @@ export default function CompanyTable({
     }
   };
 
-  const openDeleteDialog = (id) => {
-    setDeleteId(id);
-  };
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this company?")) {
+      return;
+    }
 
-  const confirmDelete = async () => {
     try {
-      await deleteCompany(deleteId);
-
+      await deleteCompany(id);
       alert("Company deleted successfully");
-
-      setDeleteId(null);
-
       loadCompanies();
     } catch (err) {
       console.error(err);
@@ -64,9 +54,7 @@ export default function CompanyTable({
         " " +
         (row.brand_name || "") +
         " " +
-        (row.gst_no || "") +
-        " " +
-        (row.mobile || "")
+        (row.gst_no || "")
       )
         .toLowerCase()
         .includes(search.toLowerCase())
@@ -78,25 +66,19 @@ export default function CompanyTable({
       field: "company_name",
       headerName: "Company",
       flex: 1,
-      minWidth: 180,
+      minWidth: 200,
     },
     {
       field: "brand_name",
       headerName: "Brand",
       flex: 1,
-      minWidth: 140,
+      minWidth: 150,
     },
     {
       field: "gst_no",
       headerName: "GST",
       flex: 1,
       minWidth: 170,
-    },
-    {
-      field: "mobile",
-      headerName: "Mobile",
-      flex: 1,
-      minWidth: 130,
     },
     {
       field: "actions",
@@ -108,11 +90,7 @@ export default function CompanyTable({
           <Button
             variant="contained"
             size="small"
-            onClick={() => {
-              if (onEdit) {
-                onEdit(params.row);
-              }
-            }}
+            onClick={() => onEdit(params.row)}
           >
             Edit
           </Button>
@@ -122,7 +100,7 @@ export default function CompanyTable({
             color="error"
             size="small"
             onClick={() =>
-              openDeleteDialog(params.row.id)
+              handleDelete(params.row.id)
             }
           >
             Delete
@@ -131,10 +109,8 @@ export default function CompanyTable({
       ),
     },
   ];
-
-  return (
+    return (
     <Box>
-
       <TextField
         fullWidth
         size="small"
@@ -161,39 +137,6 @@ export default function CompanyTable({
           disableRowSelectionOnClick
         />
       </Box>
-
-      <Dialog
-        open={deleteId !== null}
-        onClose={() => setDeleteId(null)}
-      >
-        <DialogTitle>
-          Delete Company
-        </DialogTitle>
-
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this
-            company?
-          </DialogContentText>
-        </DialogContent>
-
-        <DialogActions>
-          <Button
-            onClick={() => setDeleteId(null)}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            color="error"
-            variant="contained"
-            onClick={confirmDelete}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
     </Box>
   );
 }

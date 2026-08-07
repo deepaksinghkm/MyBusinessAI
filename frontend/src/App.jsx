@@ -1,7 +1,10 @@
-import AppRoutes from "./routes/AppRoutes";
+import MainLayout from "./layouts/MainLayout";
+import { WindowManagerProvider } from "./context/WindowManager";
 
-function App() {
-  return <AppRoutes />;
+export default function App() {
+  return (
+    <WindowManagerProvider>
+      <MainLayout />
+    </WindowManagerProvider>
+  );
 }
-
-export default App;

@@ -1,31 +1,23 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+
 import { CssBaseline } from "@mui/material";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 
 import App from "./App";
+import theme from "./styles/theme";
 
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#1976d2",
-    },
-    secondary: {
-      main: "#00bcd4",
-    },
-    background: {
-      default: "#111827",
-      paper: "#1f2937",
-    },
-  },
-});
+import "./styles/globals.css";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(
+  document.getElementById("root")
+).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
+
       <App />
+
     </ThemeProvider>
   </React.StrictMode>
 );
