@@ -15,6 +15,7 @@ export default function CompanyPage() {
 
   const handleEdit = (company) => {
     setSelectedCompany(company);
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",

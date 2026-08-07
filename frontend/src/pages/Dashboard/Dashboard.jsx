@@ -1,16 +1,15 @@
-import { Typography } from "@mui/material";
-import MainLayout from "../../layouts/MainLayout";
+import { Box, Typography } from "@mui/material";
 
 export default function Dashboard() {
   return (
-    <MainLayout>
-      <Typography variant="h4" fontWeight="bold">
+    <Box>
+      <Typography variant="h4">
         Dashboard
       </Typography>
 
       <Typography sx={{ mt: 2 }}>
         Welcome to MyBusinessAI ERP
       </Typography>
-    </MainLayout>
+    </Box>
   );
 }

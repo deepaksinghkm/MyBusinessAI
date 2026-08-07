@@ -2,26 +2,23 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-class BrandCreate(BaseModel):
-    code: str
+class BrandBase(BaseModel):
     name: str
     description: Optional[str] = None
-    is_active: bool = True
+    logo: Optional[str] = None
+    is_active: Optional[bool] = True
 
 
-class BrandUpdate(BaseModel):
-    code: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    is_active: Optional[bool] = None
+class BrandCreate(BrandBase):
+    pass
 
 
-class BrandResponse(BaseModel):
+class BrandUpdate(BrandBase):
+    pass
+
+
+class BrandResponse(BrandBase):
     id: int
-    code: str
-    name: str
-    description: Optional[str]
-    is_active: bool
 
     class Config:
         from_attributes = True

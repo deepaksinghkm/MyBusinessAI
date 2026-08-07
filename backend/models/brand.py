@@ -1,12 +1,25 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from database import Base
+from datetime import datetime
 
 
 class Brand(Base):
     __tablename__ = "brands"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String(50), unique=True, nullable=False)
-    name = Column(String(100), unique=True, nullable=False)
-    description = Column(String(255))
+
+    name = Column(String(150), nullable=False, unique=True)
+
+    description = Column(String(500))
+
+    logo = Column(String(255))
+
     is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )

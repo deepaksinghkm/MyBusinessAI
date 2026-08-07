@@ -31,7 +31,7 @@ from routers.user_roles import router as user_roles_router
 from routers.permissions import router as permissions_router
 from routers.role_permissions import router as role_permissions_router
 from routers.products import router as products_router
-from routers.brands import router as brands_router
+from routers.brand import router as brand_router
 from routers.categories import router as categories_router
 from routers.colors import router as colors_router
 from routers.sizes import router as sizes_router
@@ -46,9 +46,6 @@ from routers.company import router as company_router
 
 # Auth
 from utils.auth import get_current_user
-
-# Create Database Tables
-Base.metadata.create_all(bind=engine)
 
 # Create Database Tables
 Base.metadata.create_all(bind=engine)
@@ -72,12 +69,6 @@ app.add_middleware(
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 os.makedirs("uploads/products", exist_ok=True)
 
-app.mount(
-    "/uploads",
-    StaticFiles(directory="uploads"),
-    name="uploads"
-)
-
 # Register Routers
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -87,7 +78,7 @@ app.include_router(permissions_router)
 app.include_router(role_permissions_router)
 app.include_router(categories_router)
 app.include_router(products_router)
-app.include_router(brands_router)
+app.include_router(brand_router)
 app.include_router(colors_router)
 app.include_router(sizes_router)
 app.include_router(units_router)
