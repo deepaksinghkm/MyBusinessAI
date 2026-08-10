@@ -15,9 +15,7 @@ ReactDOM.createRoot(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
       <App />
-
     </ThemeProvider>
   </React.StrictMode>
 );

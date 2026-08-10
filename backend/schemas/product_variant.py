@@ -6,6 +6,7 @@ class ProductVariantCreate(BaseModel):
     product_id: int
     color_id: int
     size_id: int
+    stock: int = 0
 
 
 class ProductVariantUpdate(BaseModel):
@@ -18,6 +19,7 @@ class ProductVariantResponse(BaseModel):
     product_id: int
     color_id: int
     size_id: int
+    stock: int = 0
 
     class Config:
         from_attributes = True

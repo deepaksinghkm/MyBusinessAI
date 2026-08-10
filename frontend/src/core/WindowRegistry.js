@@ -13,6 +13,20 @@ const WindowRegistry = {
     height: 700,
   },
 
+  supplier: {
+    id: "supplier",
+    title: "Supplier Master",
+    width: 1200,
+    height: 750,
+  },
+
+  customer: {
+    id: "customer",
+    title: "Customer Master",
+    width: 1250,
+    height: 750,
+  },
+
   brand: {
     id: "brand",
     title: "Brand Master",
@@ -53,6 +67,20 @@ const WindowRegistry = {
     title: "Product Master",
     width: 1300,
     height: 750,
+  },
+
+  "product-variant": {
+    id: "product-variant",
+    title: "Product Variant Master",
+    width: 1200,
+    height: 700,
+  },
+
+  "stock-ledger": {
+    id: "stock-ledger",
+    title: "Stock Ledger",
+    width: 1200,
+    height: 700,
   },
 
   purchase: {

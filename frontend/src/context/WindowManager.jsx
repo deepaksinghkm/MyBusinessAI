@@ -12,7 +12,9 @@ export function WindowManagerProvider({ children }) {
     if (!config) return;
 
     setWindows((prev) => {
-      const exists = prev.find((w) => w.id === moduleId);
+      const exists = prev.find(
+        (w) => w.id === moduleId
+      );
 
       if (exists) {
         return prev.map((w) =>
@@ -34,6 +36,7 @@ export function WindowManagerProvider({ children }) {
           ...w,
           active: false,
         })),
+
         {
           ...config,
           active: true,
@@ -53,13 +56,28 @@ export function WindowManagerProvider({ children }) {
   };
 
   const minimizeWindow = (id) => {
-    setWindows((prev) =>
-      prev.map((w) =>
-        w.id === id
-          ? { ...w, minimized: true }
-          : w
-      )
-    );
+    setWindows((prev) => {
+      const remaining = prev.filter(
+        (w) => w.id !== id
+      );
+
+      const nextActive =
+        remaining.length > 0
+          ? remaining[remaining.length - 1].id
+          : null;
+
+      return prev.map((w) => ({
+        ...w,
+        minimized:
+          w.id === id
+            ? true
+            : w.minimized,
+        active:
+          w.id === id
+            ? false
+            : w.id === nextActive,
+      }));
+    });
   };
 
   const maximizeWindow = (id) => {
@@ -69,6 +87,7 @@ export function WindowManagerProvider({ children }) {
           ? {
               ...w,
               maximized: !w.maximized,
+              active: true,
             }
           : w
       )
@@ -77,10 +96,18 @@ export function WindowManagerProvider({ children }) {
 
   const activateWindow = (id) => {
     setWindows((prev) =>
-      prev.map((w) => ({
-        ...w,
-        active: w.id === id,
-      }))
+      prev.map((w) =>
+        w.id === id
+          ? {
+              ...w,
+              minimized: false,
+              active: true,
+            }
+          : {
+              ...w,
+              active: false,
+            }
+      )
     );
   };
 

@@ -21,6 +21,10 @@ from models.product_variant import ProductVariant
 from models.stock_ledger import StockLedger
 from models.settings import Settings
 from models.company import Company
+from models.supplier import Supplier
+from models.purchase import Purchase, PurchaseItem
+from models.sale import Sale, SaleItem
+from models.customer import Customer
 
 
 # Routers
@@ -43,6 +47,10 @@ from routers.catalog import router as catalog_router
 from routers.pdf_catalog import router as pdf_catalog_router
 from routers.settings import router as settings_router
 from routers.company import router as company_router
+from routers.suppliers import router as suppliers_router
+from routers.purchases import router as purchases_router
+from routers.sales import router as sales_router
+from routers.customers import router as customers_router
 
 # Auth
 from utils.auth import get_current_user
@@ -89,6 +97,10 @@ app.include_router(catalog_router)
 app.include_router(pdf_catalog_router)
 app.include_router(settings_router)
 app.include_router(company_router)
+app.include_router(suppliers_router)
+app.include_router(purchases_router)
+app.include_router(sales_router)
+app.include_router(customers_router)
 
 
 @app.get("/")

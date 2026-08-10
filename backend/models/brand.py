@@ -1,4 +1,11 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+)
+
 from database import Base
 from datetime import datetime
 
@@ -6,17 +13,42 @@ from datetime import datetime
 class Brand(Base):
     __tablename__ = "brands"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
 
-    name = Column(String(150), nullable=False, unique=True)
+    code = Column(
+        String(50),
+        nullable=False,
+    )
 
-    description = Column(String(500))
+    name = Column(
+        String(150),
+        nullable=False,
+        unique=True,
+    )
 
-    logo = Column(String(255))
+    description = Column(
+        String(500),
+        nullable=True,
+    )
 
-    is_active = Column(Boolean, default=True)
+    logo = Column(
+        String(255),
+        nullable=True,
+    )
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(
+        Boolean,
+        default=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
 
     updated_at = Column(
         DateTime,

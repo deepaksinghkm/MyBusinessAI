@@ -1,4 +1,4 @@
-import Box from "@mui/material/Box";
+import { Box } from "@mui/material";
 
 import Header from "../components/Header/Header";
 import Desktop from "../components/Desktop/Desktop";
@@ -10,6 +10,8 @@ export default function MainLayout() {
       sx={{
         width: "100%",
         height: "100vh",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
       <Header />
