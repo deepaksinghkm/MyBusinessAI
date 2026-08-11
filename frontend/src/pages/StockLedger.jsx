@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -21,12 +22,11 @@ import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
-
 const API_BASE_URL =
   "http://127.0.0.1:8000";
 
-
 const EMPTY_FORM = {
+  product_id: "",
   variant_id: "",
   transaction_type: "Purchase",
   qty: "",
@@ -34,78 +34,42 @@ const EMPTY_FORM = {
   remarks: "",
 };
 
-
 export default function StockLedgerPage() {
+  const [ledger, setLedger] = useState([]);
+  const [variants, setVariants] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [sizes, setSizes] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-  const [ledger, setLedger] =
-    useState([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
-  const [variants, setVariants] =
-    useState([]);
-
-  const [products, setProducts] =
-    useState([]);
-
-  const [colors, setColors] =
-    useState([]);
-
-  const [sizes, setSizes] =
-    useState([]);
-
-  const [categories, setCategories] =
-    useState([]);
-
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [pdfLoading, setPdfLoading] =
-    useState(false);
-
-
-  const [
-    selectedCategory,
-    setSelectedCategory,
-  ] = useState("");
-
-
-  const [
-    stockLimit,
-    setStockLimit,
-  ] = useState(5);
-
-
-  const [
-    dialogOpen,
-    setDialogOpen,
-  ] = useState(false);
-
-
-  const [form, setForm] =
-    useState({
-      ...EMPTY_FORM,
-    });
-
-
-  const [error, setError] =
+  const [selectedCategory, setSelectedCategory] =
     useState("");
 
-  const [success, setSuccess] =
-    useState("");
+  const [stockLimit, setStockLimit] =
+    useState(5);
 
+  const [dialogOpen, setDialogOpen] =
+    useState(false);
+
+  const [form, setForm] = useState({
+    ...EMPTY_FORM,
+  });
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // =====================================================
   // LOAD DATA
   // =====================================================
 
   const loadData = async () => {
-
     try {
-
       setLoading(true);
+      setError("");
 
       const [
         ledgerResponse,
@@ -115,7 +79,6 @@ export default function StockLedgerPage() {
         sizesResponse,
         categoriesResponse,
       ] = await Promise.all([
-
         fetch(
           `${API_BASE_URL}/stock-ledger/`
         ),
@@ -141,7 +104,6 @@ export default function StockLedgerPage() {
         ),
       ]);
 
-
       const [
         ledgerData,
         variantsData,
@@ -150,126 +112,112 @@ export default function StockLedgerPage() {
         sizesData,
         categoriesData,
       ] = await Promise.all([
-
         ledgerResponse.json(),
-
         variantsResponse.json(),
-
         productsResponse.json(),
-
         colorsResponse.json(),
-
         sizesResponse.json(),
-
         categoriesResponse.json(),
       ]);
 
-
       if (!ledgerResponse.ok) {
-
         throw new Error(
           ledgerData.detail ||
-          "Failed to load stock ledger"
+            "Failed to load stock ledger"
         );
       }
 
+      if (!variantsResponse.ok) {
+        throw new Error(
+          variantsData.detail ||
+            "Failed to load product variants"
+        );
+      }
 
-      if (
-        !categoriesResponse.ok
-      ) {
+      if (!productsResponse.ok) {
+        throw new Error(
+          productsData.detail ||
+            "Failed to load products"
+        );
+      }
 
+      if (!colorsResponse.ok) {
+        throw new Error(
+          colorsData.detail ||
+            "Failed to load colors"
+        );
+      }
+
+      if (!sizesResponse.ok) {
+        throw new Error(
+          sizesData.detail ||
+            "Failed to load sizes"
+        );
+      }
+
+      if (!categoriesResponse.ok) {
         throw new Error(
           categoriesData.detail ||
-          "Failed to load categories"
+            "Failed to load categories"
         );
       }
 
-
       setLedger(
-        Array.isArray(
-          ledgerData
-        )
+        Array.isArray(ledgerData)
           ? ledgerData
           : []
       );
 
-
       setVariants(
-        Array.isArray(
-          variantsData
-        )
+        Array.isArray(variantsData)
           ? variantsData
           : []
       );
 
-
       setProducts(
-        Array.isArray(
-          productsData
-        )
+        Array.isArray(productsData)
           ? productsData
           : []
       );
 
-
       setColors(
-        Array.isArray(
-          colorsData
-        )
+        Array.isArray(colorsData)
           ? colorsData
           : []
       );
 
-
       setSizes(
-        Array.isArray(
-          sizesData
-        )
+        Array.isArray(sizesData)
           ? sizesData
           : []
       );
 
-
       setCategories(
-        Array.isArray(
-          categoriesData
-        )
+        Array.isArray(categoriesData)
           ? categoriesData
           : []
       );
-
-
     } catch (err) {
-
       console.error(err);
 
       setError(
         err.message ||
-        "Failed to load stock ledger"
+          "Failed to load stock ledger"
       );
-
     } finally {
-
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
-
     loadData();
-
   }, []);
-
 
   // =====================================================
   // HELPERS
   // =====================================================
 
-  const getVariant = (
-    variantId
-  ) => {
-
+  const getVariant = (variantId) => {
     return variants.find(
       (item) =>
         Number(item.id) ===
@@ -277,11 +225,7 @@ export default function StockLedgerPage() {
     );
   };
 
-
-  const getProduct = (
-    productId
-  ) => {
-
+  const getProduct = (productId) => {
     return products.find(
       (item) =>
         Number(item.id) ===
@@ -289,11 +233,7 @@ export default function StockLedgerPage() {
     );
   };
 
-
-  const getProductName = (
-    productId
-  ) => {
-
+  const getProductName = (productId) => {
     const product =
       getProduct(productId);
 
@@ -304,46 +244,31 @@ export default function StockLedgerPage() {
     return `${product.sku} - ${product.name}`;
   };
 
-
-  const getColorName = (
-    colorId
-  ) => {
-
-    const color =
-      colors.find(
-        (item) =>
-          Number(item.id) ===
-          Number(colorId)
-      );
+  const getColorName = (colorId) => {
+    const color = colors.find(
+      (item) =>
+        Number(item.id) ===
+        Number(colorId)
+    );
 
     return color?.name || "-";
   };
 
-
-  const getSizeName = (
-    sizeId
-  ) => {
-
-    const size =
-      sizes.find(
-        (item) =>
-          Number(item.id) ===
-          Number(sizeId)
-      );
+  const getSizeName = (sizeId) => {
+    const size = sizes.find(
+      (item) =>
+        Number(item.id) ===
+        Number(sizeId)
+    );
 
     return size?.name || "-";
   };
 
-
-  const getVariantLabel = (
-    variantId
-  ) => {
-
+  const getVariantLabel = (variantId) => {
     const variant =
       getVariant(variantId);
 
     if (!variant) {
-
       return `Variant #${variantId}`;
     }
 
@@ -360,11 +285,28 @@ export default function StockLedgerPage() {
     );
   };
 
+  // =====================================================
+  // PRODUCT VARIANTS
+  // =====================================================
+
+  const getProductVariants = (productId) => {
+    if (!productId) {
+      return [];
+    }
+
+    return variants.filter(
+      (variant) =>
+        Number(variant.product_id) ===
+        Number(productId)
+    );
+  };
+
+  // =====================================================
+  // CATEGORY NAME
+  // =====================================================
 
   const getCategoryName = () => {
-
     if (!selectedCategory) {
-
       return "All Categories";
     }
 
@@ -381,22 +323,18 @@ export default function StockLedgerPage() {
     );
   };
 
-
   // =====================================================
   // GENERATE PDF
   // =====================================================
 
   const generatePdf = async () => {
-
     const limit =
       Number(stockLimit);
-
 
     if (
       !Number.isInteger(limit) ||
       limit < 1
     ) {
-
       setError(
         "Please enter a valid stock limit greater than 0."
       );
@@ -404,79 +342,57 @@ export default function StockLedgerPage() {
       return;
     }
 
-
     try {
-
       setPdfLoading(true);
-
 
       let url;
 
-
       if (selectedCategory) {
-
         url =
           `${API_BASE_URL}` +
           `/pdf-catalog/generate/category/` +
           `${selectedCategory}` +
           `?stock_limit=${limit}`;
-
       } else {
-
         url =
           `${API_BASE_URL}` +
           `/pdf-catalog/generate` +
           `?stock_limit=${limit}`;
       }
 
-
       const response =
         await fetch(url);
 
-
       if (!response.ok) {
-
         let message =
           "Failed to generate PDF.";
 
         try {
-
           const data =
             await response.json();
 
           message =
             data.detail ||
             message;
-
         } catch {
           // Ignore
         }
 
-        throw new Error(
-          message
-        );
+        throw new Error(message);
       }
-
 
       const blob =
         await response.blob();
-
 
       const blobUrl =
         window.URL.createObjectURL(
           blob
         );
 
-
       const link =
-        document.createElement(
-          "a"
-        );
+        document.createElement("a");
 
-
-      link.href =
-        blobUrl;
-
+      link.href = blobUrl;
 
       const categoryName =
         getCategoryName()
@@ -485,75 +401,65 @@ export default function StockLedgerPage() {
             "_"
           );
 
-
       link.download =
         `${categoryName}` +
         `_Stock_${limit}` +
         `_or_less.pdf`;
 
-
       document.body.appendChild(
         link
       );
 
-
       link.click();
 
-
       link.remove();
-
 
       window.URL.revokeObjectURL(
         blobUrl
       );
 
-
       setSuccess(
         `${getCategoryName()} PDF generated successfully for stock ${limit} or less.`
       );
-
-
     } catch (err) {
-
       console.error(err);
 
       setError(
         err.message ||
-        "Failed to generate PDF."
+          "Failed to generate PDF."
       );
-
     } finally {
-
       setPdfLoading(false);
     }
   };
 
-
   // =====================================================
-  // FORM
+  // FORM CHANGE
   // =====================================================
 
-  const handleChange = (
-    event
-  ) => {
-
+  const handleChange = (event) => {
     const {
       name,
       value,
     } = event.target;
 
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
 
-    setForm(
-      (previous) => ({
-        ...previous,
-        [name]: value,
-      })
-    );
+      ...(name === "product_id"
+        ? {
+            variant_id: "",
+          }
+        : {}),
+    }));
   };
 
+  // =====================================================
+  // OPEN DIALOG
+  // =====================================================
 
   const handleAdd = () => {
-
     setForm({
       ...EMPTY_FORM,
     });
@@ -561,9 +467,11 @@ export default function StockLedgerPage() {
     setDialogOpen(true);
   };
 
+  // =====================================================
+  // CLOSE DIALOG
+  // =====================================================
 
   const handleClose = () => {
-
     if (saving) {
       return;
     }
@@ -575,29 +483,32 @@ export default function StockLedgerPage() {
     });
   };
 
-
   // =====================================================
   // SAVE STOCK ENTRY
   // =====================================================
 
   const handleSave = async () => {
-
-    if (!form.variant_id) {
-
+    if (!form.product_id) {
       setError(
-        "Please select a variant."
+        "Please select a product."
       );
 
       return;
     }
 
+    if (!form.variant_id) {
+      setError(
+        "Please select a product variant."
+      );
+
+      return;
+    }
 
     if (
       form.qty === "" ||
       form.qty === null ||
       form.qty === undefined
     ) {
-
       setError(
         "Please enter quantity."
       );
@@ -605,15 +516,12 @@ export default function StockLedgerPage() {
       return;
     }
 
-
     const quantity =
       Number(form.qty);
-
 
     if (
       Number.isNaN(quantity)
     ) {
-
       setError(
         "Quantity must be a valid number."
       );
@@ -621,9 +529,7 @@ export default function StockLedgerPage() {
       return;
     }
 
-
     if (quantity === 0) {
-
       setError(
         "Quantity cannot be zero."
       );
@@ -631,13 +537,11 @@ export default function StockLedgerPage() {
       return;
     }
 
-
     if (
       form.transaction_type !==
         "Adjustment" &&
       quantity < 0
     ) {
-
       setError(
         "Quantity must be positive for this transaction."
       );
@@ -645,14 +549,10 @@ export default function StockLedgerPage() {
       return;
     }
 
-
     try {
-
       setSaving(true);
 
-
       const payload = {
-
         variant_id:
           Number(
             form.variant_id
@@ -661,8 +561,7 @@ export default function StockLedgerPage() {
         transaction_type:
           form.transaction_type,
 
-        qty:
-          quantity,
+        qty: quantity,
 
         reference_no:
           form.reference_no ||
@@ -672,7 +571,6 @@ export default function StockLedgerPage() {
           form.remarks ||
           null,
       };
-
 
       const response =
         await fetch(
@@ -692,51 +590,38 @@ export default function StockLedgerPage() {
           }
         );
 
-
       const result =
         await response.json();
 
-
       if (!response.ok) {
-
         throw new Error(
           result.detail ||
-          "Failed to create stock transaction"
+            "Failed to create stock transaction"
         );
       }
-
 
       setSuccess(
         "Stock transaction saved successfully."
       );
 
-
       setDialogOpen(false);
-
 
       setForm({
         ...EMPTY_FORM,
       });
 
-
       await loadData();
-
-
     } catch (err) {
-
       console.error(err);
 
       setError(
         err.message ||
-        "Failed to save transaction."
+          "Failed to save transaction."
       );
-
     } finally {
-
       setSaving(false);
     }
   };
-
 
   // =====================================================
   // TRANSACTION COLOR
@@ -745,9 +630,7 @@ export default function StockLedgerPage() {
   const getTransactionColor = (
     type
   ) => {
-
     switch (type) {
-
       case "Opening":
         return "info";
 
@@ -765,19 +648,16 @@ export default function StockLedgerPage() {
     }
   };
 
-
   // =====================================================
   // UI
   // =====================================================
 
   return (
-
     <Box
       sx={{
         width: "100%",
       }}
     >
-
       {/* =================================================
           HEADER
       ================================================= */}
@@ -793,16 +673,13 @@ export default function StockLedgerPage() {
           flexWrap: "wrap",
         }}
       >
-
         <Box>
-
           <Typography
             variant="h5"
             fontWeight={700}
           >
             Stock Ledger
           </Typography>
-
 
           <Typography
             variant="body2"
@@ -812,9 +689,7 @@ export default function StockLedgerPage() {
             Sale and Stock Adjustment
             transactions
           </Typography>
-
         </Box>
-
 
         <Box
           sx={{
@@ -824,7 +699,6 @@ export default function StockLedgerPage() {
             flexWrap: "wrap",
           }}
         >
-
           {/* CATEGORY */}
 
           <TextField
@@ -843,15 +717,12 @@ export default function StockLedgerPage() {
               minWidth: 190,
             }}
           >
-
             <MenuItem value="">
               All Categories
             </MenuItem>
 
-
             {categories.map(
               (category) => (
-
                 <MenuItem
                   key={
                     category.id
@@ -862,12 +733,9 @@ export default function StockLedgerPage() {
                 >
                   {category.name}
                 </MenuItem>
-
               )
             )}
-
           </TextField>
-
 
           {/* STOCK LIMIT */}
 
@@ -889,7 +757,6 @@ export default function StockLedgerPage() {
             }}
           />
 
-
           {/* PDF */}
 
           <Button
@@ -905,13 +772,10 @@ export default function StockLedgerPage() {
               pdfLoading
             }
           >
-
             {pdfLoading
               ? "Generating..."
               : "Generate PDF"}
-
           </Button>
-
 
           {/* REFRESH */}
 
@@ -927,7 +791,6 @@ export default function StockLedgerPage() {
             Refresh
           </Button>
 
-
           {/* STOCK ENTRY */}
 
           <Button
@@ -941,11 +804,8 @@ export default function StockLedgerPage() {
           >
             Stock Entry
           </Button>
-
         </Box>
-
       </Box>
-
 
       {/* =================================================
           STOCK RULE INFO
@@ -964,7 +824,6 @@ export default function StockLedgerPage() {
         वाले variants PDF में नहीं आएंगे।
       </Alert>
 
-
       {/* =================================================
           SUMMARY
       ================================================= */}
@@ -978,10 +837,8 @@ export default function StockLedgerPage() {
           mb: 2,
         }}
       >
-
         <Card>
           <CardContent>
-
             <Typography
               variant="body2"
               color="text.secondary"
@@ -995,14 +852,11 @@ export default function StockLedgerPage() {
             >
               {ledger.length}
             </Typography>
-
           </CardContent>
         </Card>
 
-
         <Card>
           <CardContent>
-
             <Typography
               variant="body2"
               color="text.secondary"
@@ -1016,14 +870,11 @@ export default function StockLedgerPage() {
             >
               {variants.length}
             </Typography>
-
           </CardContent>
         </Card>
 
-
         <Card>
           <CardContent>
-
             <Typography
               variant="body2"
               color="text.secondary"
@@ -1053,14 +904,11 @@ export default function StockLedgerPage() {
                   0
                 )}
             </Typography>
-
           </CardContent>
         </Card>
 
-
         <Card>
           <CardContent>
-
             <Typography
               variant="body2"
               color="text.secondary"
@@ -1090,19 +938,15 @@ export default function StockLedgerPage() {
                   0
                 )}
             </Typography>
-
           </CardContent>
         </Card>
-
       </Box>
-
 
       {/* =================================================
           LEDGER TABLE
       ================================================= */}
 
       <Card>
-
         <CardContent
           sx={{
             p: 0,
@@ -1112,7 +956,6 @@ export default function StockLedgerPage() {
             },
           }}
         >
-
           {/* HEADER */}
 
           <Box
@@ -1130,7 +973,6 @@ export default function StockLedgerPage() {
               fontWeight: 700,
             }}
           >
-
             <Box>ID</Box>
 
             <Box>Variant</Box>
@@ -1141,21 +983,16 @@ export default function StockLedgerPage() {
 
             <Box>Qty</Box>
 
-            <Box>
-              Reference
-            </Box>
+            <Box>Reference</Box>
 
             <Box>Remarks</Box>
 
             <Box>Date</Box>
-
           </Box>
-
 
           {/* LOADING */}
 
           {loading && (
-
             <Box
               sx={{
                 p: 5,
@@ -1163,21 +1000,16 @@ export default function StockLedgerPage() {
                   "center",
               }}
             >
-
               <Typography>
                 Loading stock ledger...
               </Typography>
-
             </Box>
-
           )}
-
 
           {/* EMPTY */}
 
           {!loading &&
             ledger.length === 0 && (
-
               <Box
                 sx={{
                   p: 5,
@@ -1185,25 +1017,20 @@ export default function StockLedgerPage() {
                     "center",
                 }}
               >
-
                 <Typography
                   color="text.secondary"
                 >
                   No stock transactions
                   found.
                 </Typography>
-
               </Box>
-
             )}
-
 
           {/* ROWS */}
 
           {!loading &&
             ledger.map(
               (item) => (
-
                 <Box
                   key={
                     item.id
@@ -1226,11 +1053,9 @@ export default function StockLedgerPage() {
                     },
                   }}
                 >
-
                   <Box>
                     {item.id}
                   </Box>
-
 
                   <Box
                     sx={{
@@ -1243,9 +1068,7 @@ export default function StockLedgerPage() {
                     )}
                   </Box>
 
-
                   <Box>
-
                     <Chip
                       size="small"
                       label={
@@ -1257,9 +1080,7 @@ export default function StockLedgerPage() {
                         )
                       }
                     />
-
                   </Box>
-
 
                   <Box
                     sx={{
@@ -1270,14 +1091,12 @@ export default function StockLedgerPage() {
                     {item.qty}
                   </Box>
 
-
                   <Box>
                     {
                       item.reference_no ||
                       "-"
                     }
                   </Box>
-
 
                   <Box
                     sx={{
@@ -1295,9 +1114,7 @@ export default function StockLedgerPage() {
                     }
                   </Box>
 
-
                   <Box>
-
                     {item.created_at
                       ? new Date(
                           item.created_at
@@ -1305,18 +1122,12 @@ export default function StockLedgerPage() {
                           "en-IN"
                         )
                       : "-"}
-
                   </Box>
-
                 </Box>
-
               )
             )}
-
         </CardContent>
-
       </Card>
-
 
       {/* =================================================
           STOCK ENTRY DIALOG
@@ -1330,14 +1141,11 @@ export default function StockLedgerPage() {
         fullWidth
         maxWidth="sm"
       >
-
         <DialogTitle>
           New Stock Transaction
         </DialogTitle>
 
-
         <DialogContent>
-
           <Box
             sx={{
               display:
@@ -1346,53 +1154,235 @@ export default function StockLedgerPage() {
               pt: 1,
             }}
           >
+            {/* =================================================
+                PRODUCT
+            ================================================= */}
 
-            {/* VARIANT */}
-
-            <TextField
-              select
+            <Autocomplete
               fullWidth
-              label="Product Variant"
-              name="variant_id"
+              options={products}
               value={
-                form.variant_id
+                products.find(
+                  (product) =>
+                    Number(
+                      product.id
+                    ) ===
+                    Number(
+                      form.product_id
+                    )
+                ) || null
               }
-              onChange={
-                handleChange
+              getOptionLabel={(
+                product
+              ) =>
+                product
+                  ? `${product.sku} - ${product.name}`
+                  : ""
               }
-              required
-            >
-
-              <MenuItem value="">
-                Select Variant
-              </MenuItem>
-
-
-              {variants.map(
-                (variant) => (
-
-                  <MenuItem
-                    key={
-                      variant.id
-                    }
-                    value={
-                      variant.id
-                    }
-                  >
-                    {
-                      getVariantLabel(
-                        variant.id
-                      )
-                    }
-                  </MenuItem>
-
+              isOptionEqualToValue={(
+                option,
+                value
+              ) =>
+                Number(
+                  option.id
+                ) ===
+                Number(
+                  value.id
                 )
+              }
+              onChange={(
+                event,
+                newValue
+              ) => {
+                setForm(
+                  (previous) => ({
+                    ...previous,
+
+                    product_id:
+                      newValue?.id ||
+                      "",
+
+                    variant_id:
+                      "",
+                  })
+                );
+              }}
+              renderOption={(
+                props,
+                product
+              ) => (
+                <Box
+                  component="li"
+                  {...props}
+                  key={
+                    product.id
+                  }
+                >
+                  <Box>
+                    <Typography
+                      fontWeight={600}
+                    >
+                      {product.name}
+                    </Typography>
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                    >
+                      SKU:{" "}
+                      {product.sku}
+                      {" | "}
+                      MRP: ₹
+                      {product.mrp}
+                    </Typography>
+                  </Box>
+                </Box>
               )}
+              renderInput={(
+                params
+              ) => (
+                <TextField
+                  {...params}
+                  label="Product"
+                  placeholder="Search SKU / Product"
+                  required
+                />
+              )}
+            />
 
-            </TextField>
+            {/* =================================================
+                PRODUCT VARIANT
+            ================================================= */}
 
+            <Autocomplete
+              fullWidth
+              options={
+                getProductVariants(
+                  form.product_id
+                )
+              }
+              value={
+                getProductVariants(
+                  form.product_id
+                ).find(
+                  (variant) =>
+                    Number(
+                      variant.id
+                    ) ===
+                    Number(
+                      form.variant_id
+                    )
+                ) || null
+              }
+              disabled={
+                !form.product_id
+              }
+              getOptionLabel={(
+                variant
+              ) =>
+                variant
+                  ? `${getColorName(
+                      variant.color_id
+                    )} | Size ${getSizeName(
+                      variant.size_id
+                    )} | Stock: ${variant.stock}`
+                  : ""
+              }
+              isOptionEqualToValue={(
+                option,
+                value
+              ) =>
+                Number(
+                  option.id
+                ) ===
+                Number(
+                  value.id
+                )
+              }
+              onChange={(
+                event,
+                newValue
+              ) => {
+                setForm(
+                  (previous) => ({
+                    ...previous,
 
-            {/* TRANSACTION */}
+                    variant_id:
+                      newValue?.id ||
+                      "",
+                  })
+                );
+              }}
+              renderOption={(
+                props,
+                variant
+              ) => (
+                <Box
+                  component="li"
+                  {...props}
+                  key={
+                    variant.id
+                  }
+                  sx={{
+                    display:
+                      "flex",
+                    justifyContent:
+                      "space-between",
+                    width:
+                      "100%",
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      fontWeight={600}
+                    >
+                      {getColorName(
+                        variant.color_id
+                      )}{" "}
+                      | Size{" "}
+                      {getSizeName(
+                        variant.size_id
+                      )}
+                    </Typography>
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                    >
+                      Current Stock:{" "}
+                      {variant.stock}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              renderInput={(
+                params
+              ) => (
+                <TextField
+                  {...params}
+                  label="Product Variant"
+                  placeholder={
+                    form.product_id
+                      ? "Select Color / Size"
+                      : "First select product"
+                  }
+                  helperText={
+                    !form.product_id
+                      ? "First select a product"
+                      : getProductVariants(
+                          form.product_id
+                        ).length === 0
+                      ? "No variants found for this product"
+                      : ""
+                  }
+                  required
+                />
+              )}
+            />
+
+            {/* =================================================
+                TRANSACTION
+            ================================================= */}
 
             <TextField
               select
@@ -1406,7 +1396,6 @@ export default function StockLedgerPage() {
                 handleChange
               }
             >
-
               <MenuItem value="Opening">
                 Opening
               </MenuItem>
@@ -1422,11 +1411,11 @@ export default function StockLedgerPage() {
               <MenuItem value="Adjustment">
                 Adjustment
               </MenuItem>
-
             </TextField>
 
-
-            {/* QTY */}
+            {/* =================================================
+                QTY
+            ================================================= */}
 
             <TextField
               fullWidth
@@ -1440,6 +1429,9 @@ export default function StockLedgerPage() {
                 handleChange
               }
               required
+              inputProps={{
+                step: 1,
+              }}
               helperText={
                 form.transaction_type ===
                 "Adjustment"
@@ -1448,8 +1440,9 @@ export default function StockLedgerPage() {
               }
             />
 
-
-            {/* REFERENCE */}
+            {/* =================================================
+                REFERENCE
+            ================================================= */}
 
             <TextField
               fullWidth
@@ -1464,8 +1457,9 @@ export default function StockLedgerPage() {
               placeholder="PO / Invoice / Adjustment No."
             />
 
-
-            {/* REMARKS */}
+            {/* =================================================
+                REMARKS
+            ================================================= */}
 
             <TextField
               fullWidth
@@ -1481,14 +1475,10 @@ export default function StockLedgerPage() {
               }
               placeholder="Enter remarks"
             />
-
           </Box>
-
         </DialogContent>
 
-
         <DialogActions>
-
           <Button
             onClick={
               handleClose
@@ -1499,7 +1489,6 @@ export default function StockLedgerPage() {
           >
             Cancel
           </Button>
-
 
           <Button
             variant="contained"
@@ -1514,11 +1503,8 @@ export default function StockLedgerPage() {
               ? "Saving..."
               : "Save Transaction"}
           </Button>
-
         </DialogActions>
-
       </Dialog>
-
 
       {/* =================================================
           ERROR
@@ -1539,7 +1525,6 @@ export default function StockLedgerPage() {
           horizontal: "center",
         }}
       >
-
         <Alert
           severity="error"
           onClose={() =>
@@ -1548,9 +1533,7 @@ export default function StockLedgerPage() {
         >
           {error}
         </Alert>
-
       </Snackbar>
-
 
       {/* =================================================
           SUCCESS
@@ -1571,7 +1554,6 @@ export default function StockLedgerPage() {
           horizontal: "center",
         }}
       >
-
         <Alert
           severity="success"
           onClose={() =>
@@ -1580,9 +1562,7 @@ export default function StockLedgerPage() {
         >
           {success}
         </Alert>
-
       </Snackbar>
-
     </Box>
   );
 }

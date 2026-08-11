@@ -34,6 +34,9 @@ import StraightenIcon
 import Inventory2Icon
   from "@mui/icons-material/Inventory2";
 
+import WidgetsIcon
+  from "@mui/icons-material/Widgets";
+
 import AccountBalanceWalletIcon
   from "@mui/icons-material/AccountBalanceWallet";
 
@@ -298,6 +301,27 @@ export default function Header() {
               }
             >
               <Inventory2Icon />
+            </IconButton>
+
+          </Tooltip>
+
+
+          {/* ========================================= */}
+          {/* PRODUCT VARIANT */}
+          {/* ========================================= */}
+
+          <Tooltip
+            title="Product Variant Master"
+          >
+
+            <IconButton
+              onClick={() =>
+                openWindow(
+                  "product-variant"
+                )
+              }
+            >
+              <WidgetsIcon />
             </IconButton>
 
           </Tooltip>
