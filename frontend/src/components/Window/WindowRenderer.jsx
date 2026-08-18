@@ -11,12 +11,16 @@ import CategoryPage from "../../pages/Category/CategoryPage";
 import ColorPage from "../../pages/Color/ColorPage";
 import SizePage from "../../pages/Size/SizePage";
 import UnitPage from "../../pages/Unit/UnitPage";
+
 import ProductPage from "../../pages/Product/ProductPage";
 import ProductVariantPage from "../../pages/ProductVariant";
 import StockLedgerPage from "../../pages/StockLedger";
 import PurchasePage from "../../pages/Purchase/PurchasePage";
-
 import SalesPage from "../../pages/Sales/SalesPage";
+
+import ReportsPage from "../../pages/Reports/ReportsPage";
+import SalesRegisterPage from "../../pages/Reports/SalesRegisterPage";
+import MastersPage from "../../pages/Masters/MastersPage";
 
 export default function WindowRenderer({ window }) {
   switch (window.id) {
@@ -31,6 +35,9 @@ export default function WindowRenderer({ window }) {
 
     case "customer":
       return <CustomerPage />;
+
+    case "masters":
+      return <MastersPage />;
 
     case "brand":
       return <BrandPage />;
@@ -62,19 +69,11 @@ export default function WindowRenderer({ window }) {
     case "sales":
       return <SalesPage />;
 
-    case "inventory":
-      return (
-        <Typography variant="h5">
-          Inventory Window Working
-        </Typography>
-      );
-
     case "reports":
-      return (
-        <Typography variant="h5">
-          Reports Window Working
-        </Typography>
-      );
+      return <ReportsPage />;
+
+    case "sales-register":
+      return <SalesRegisterPage />;
 
     case "settings":
       return (

@@ -1,42 +1,46 @@
 import { createContext, useContext, useState } from "react";
 import WindowRegistry from "../core/WindowRegistry";
 
-const WindowManagerContext = createContext();
+const WindowManagerContext = createContext(null);
 
 export function WindowManagerProvider({ children }) {
   const [windows, setWindows] = useState([]);
+  const [activeModule, setActiveModule] = useState("dashboard");
 
+  const navigate = (moduleId) => {
+    if (!WindowRegistry[moduleId]) {
+      return;
+    }
+
+    setActiveModule(moduleId);
+  };
+
+  // Old compatibility function.
+  // Existing components that still call openWindow()
+  // will continue to work.
   const openWindow = (moduleId) => {
-    const config = WindowRegistry[moduleId];
-
-    if (!config) return;
+    navigate(moduleId);
 
     setWindows((prev) => {
       const exists = prev.find(
-        (w) => w.id === moduleId
+        (window) => window.id === moduleId
       );
 
       if (exists) {
-        return prev.map((w) =>
-          w.id === moduleId
-            ? {
-                ...w,
-                minimized: false,
-                active: true,
-              }
-            : {
-                ...w,
-                active: false,
-              }
-        );
+        return prev.map((window) => ({
+          ...window,
+          active: window.id === moduleId,
+          minimized: false,
+        }));
       }
 
+      const config = WindowRegistry[moduleId];
+
       return [
-        ...prev.map((w) => ({
-          ...w,
+        ...prev.map((window) => ({
+          ...window,
           active: false,
         })),
-
         {
           ...config,
           active: true,
@@ -51,60 +55,51 @@ export function WindowManagerProvider({ children }) {
 
   const closeWindow = (id) => {
     setWindows((prev) =>
-      prev.filter((w) => w.id !== id)
+      prev.filter((window) => window.id !== id)
     );
   };
 
   const minimizeWindow = (id) => {
-    setWindows((prev) => {
-      const remaining = prev.filter(
-        (w) => w.id !== id
-      );
-
-      const nextActive =
-        remaining.length > 0
-          ? remaining[remaining.length - 1].id
-          : null;
-
-      return prev.map((w) => ({
-        ...w,
-        minimized:
-          w.id === id
-            ? true
-            : w.minimized,
-        active:
-          w.id === id
-            ? false
-            : w.id === nextActive,
-      }));
-    });
+    setWindows((prev) =>
+      prev.map((window) =>
+        window.id === id
+          ? {
+              ...window,
+              minimized: true,
+              active: false,
+            }
+          : window
+      )
+    );
   };
 
   const maximizeWindow = (id) => {
     setWindows((prev) =>
-      prev.map((w) =>
-        w.id === id
+      prev.map((window) =>
+        window.id === id
           ? {
-              ...w,
-              maximized: !w.maximized,
+              ...window,
+              maximized: !window.maximized,
               active: true,
             }
-          : w
+          : window
       )
     );
   };
 
   const activateWindow = (id) => {
+    navigate(id);
+
     setWindows((prev) =>
-      prev.map((w) =>
-        w.id === id
+      prev.map((window) =>
+        window.id === id
           ? {
-              ...w,
+              ...window,
               minimized: false,
               active: true,
             }
           : {
-              ...w,
+              ...window,
               active: false,
             }
       )
@@ -115,6 +110,8 @@ export function WindowManagerProvider({ children }) {
     <WindowManagerContext.Provider
       value={{
         windows,
+        activeModule,
+        navigate,
         openWindow,
         closeWindow,
         minimizeWindow,

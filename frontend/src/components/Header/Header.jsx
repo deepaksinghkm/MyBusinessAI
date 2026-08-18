@@ -1,444 +1,697 @@
+import { useState } from "react";
+
 import {
   AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
   Box,
+  Button,
+  Menu,
+  MenuItem,
+  Toolbar,
   Tooltip,
+  Typography,
 } from "@mui/material";
 
-import DashboardIcon
-  from "@mui/icons-material/Dashboard";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import PrintIcon from "@mui/icons-material/Print";
+import SettingsIcon from "@mui/icons-material/Settings";
 
-import BusinessIcon
-  from "@mui/icons-material/Business";
+import BusinessIcon from "@mui/icons-material/Business";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import PeopleIcon from "@mui/icons-material/People";
+import BrandingWatermarkIcon from "@mui/icons-material/BrandingWatermark";
+import CategoryIcon from "@mui/icons-material/Category";
+import PaletteIcon from "@mui/icons-material/Palette";
+import StraightenIcon from "@mui/icons-material/Straighten";
+import ScaleIcon from "@mui/icons-material/Scale";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
 
-import LocalShippingIcon
-  from "@mui/icons-material/LocalShipping";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 
-import PeopleIcon
-  from "@mui/icons-material/People";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import TuneIcon from "@mui/icons-material/Tune";
 
-import BrandingWatermarkIcon
-  from "@mui/icons-material/BrandingWatermark";
+import HelpIcon from "@mui/icons-material/Help";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-import CategoryIcon
-  from "@mui/icons-material/Category";
-
-import PaletteIcon
-  from "@mui/icons-material/Palette";
-
-import StraightenIcon
-  from "@mui/icons-material/Straighten";
-
-import Inventory2Icon
-  from "@mui/icons-material/Inventory2";
-
-import WidgetsIcon
-  from "@mui/icons-material/Widgets";
-
-import AccountBalanceWalletIcon
-  from "@mui/icons-material/AccountBalanceWallet";
-
-import ShoppingCartIcon
-  from "@mui/icons-material/ShoppingCart";
-
-import PointOfSaleIcon
-  from "@mui/icons-material/PointOfSale";
-
-import AssessmentIcon
-  from "@mui/icons-material/Assessment";
-
-import SettingsIcon
-  from "@mui/icons-material/Settings";
-
-import AccountCircleIcon
-  from "@mui/icons-material/AccountCircle";
-
-import { useWindowManager }
-  from "../../context/WindowManager";
-
+import { useWindowManager } from "../../context/WindowManager";
 
 export default function Header() {
+  const { openWindow } = useWindowManager();
 
-  const {
-    openWindow,
-  } = useWindowManager();
+  // =========================================================
+  // MENU ANCHORS
+  // =========================================================
 
+  const [administrationAnchor, setAdministrationAnchor] =
+    useState(null);
+
+  const [transactionsAnchor, setTransactionsAnchor] =
+    useState(null);
+
+  const [reportsAnchor, setReportsAnchor] =
+    useState(null);
+
+  const [printingAnchor, setPrintingAnchor] =
+    useState(null);
+
+  // =========================================================
+  // OPEN / CLOSE MENUS
+  // =========================================================
+
+  const handleAdministrationOpen = (event) => {
+    setAdministrationAnchor(event.currentTarget);
+  };
+
+  const handleAdministrationClose = () => {
+    setAdministrationAnchor(null);
+  };
+
+  const handleTransactionsOpen = (event) => {
+    setTransactionsAnchor(event.currentTarget);
+  };
+
+  const handleTransactionsClose = () => {
+    setTransactionsAnchor(null);
+  };
+
+  const handleReportsOpen = (event) => {
+    setReportsAnchor(event.currentTarget);
+  };
+
+  const handleReportsClose = () => {
+    setReportsAnchor(null);
+  };
+
+  const handlePrintingOpen = (event) => {
+    setPrintingAnchor(event.currentTarget);
+  };
+
+  const handlePrintingClose = () => {
+    setPrintingAnchor(null);
+  };
+
+  // =========================================================
+  // OPEN MODULE
+  // =========================================================
+
+  const openModule = (moduleId) => {
+    handleAdministrationClose();
+    handleTransactionsClose();
+    handleReportsClose();
+    handlePrintingClose();
+
+    openWindow(moduleId);
+  };
 
   return (
+    <>
+      {/* =====================================================
+          TOP ERP HEADER
+      ====================================================== */}
 
-    <AppBar
-      position="fixed"
-      color="inherit"
-      elevation={2}
-      sx={{
-        height: 60,
-        justifyContent: "center",
-        zIndex: 2000,
-      }}
-    >
-
-      <Toolbar
+      <AppBar
+        position="fixed"
+        elevation={3}
         sx={{
-          minHeight:
-            "60px !important",
+          height: 64,
+          bgcolor: "#ffffff",
+          color: "#0f172a",
+          zIndex: 3000,
+          borderBottom:
+            "1px solid #dbe3ef",
         }}
       >
-
-        {/* ============================================= */}
-        {/* ERP NAME */}
-        {/* ============================================= */}
-
-        <Typography
-          variant="h6"
+        <Toolbar
           sx={{
-            fontWeight: "bold",
-            color: "#1976d2",
-            mr: 3,
-            whiteSpace: "nowrap",
-          }}
-        >
-          MyBusinessAI ERP
-        </Typography>
-
-
-        {/* ============================================= */}
-        {/* MODULES */}
-        {/* ============================================= */}
-
-        <Box
-          sx={{
-            display: "flex",
+            minHeight:
+              "64px !important",
+            px: 1.5,
             gap: 0.5,
-            flexGrow: 1,
-            overflowX: "auto",
           }}
         >
+          {/* =================================================
+              LOGO / ERP NAME
+          ================================================== */}
 
-          {/* ========================================= */}
-          {/* DASHBOARD */}
-          {/* ========================================= */}
-
-          <Tooltip title="Dashboard">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "dashboard"
-                )
-              }
-            >
-              <DashboardIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* COMPANY */}
-          {/* ========================================= */}
-
-          <Tooltip title="Company">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "company"
-                )
-              }
-            >
-              <BusinessIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* SUPPLIER */}
-          {/* ========================================= */}
-
-          <Tooltip title="Supplier">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "supplier"
-                )
-              }
-            >
-              <LocalShippingIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* CUSTOMER */}
-          {/* ========================================= */}
-
-          <Tooltip title="Customer">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "customer"
-                )
-              }
-            >
-              <PeopleIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* BRAND */}
-          {/* ========================================= */}
-
-          <Tooltip title="Brand">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "brand"
-                )
-              }
-            >
-              <BrandingWatermarkIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* CATEGORY */}
-          {/* ========================================= */}
-
-          <Tooltip title="Category">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "category"
-                )
-              }
-            >
-              <CategoryIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* COLOR */}
-          {/* ========================================= */}
-
-          <Tooltip title="Color">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "color"
-                )
-              }
-            >
-              <PaletteIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* SIZE */}
-          {/* ========================================= */}
-
-          <Tooltip title="Size">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "size"
-                )
-              }
-            >
-              <StraightenIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* UNIT */}
-          {/* ========================================= */}
-
-          <Tooltip title="Unit">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "unit"
-                )
-              }
-            >
-              <StraightenIcon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* PRODUCT */}
-          {/* ========================================= */}
-
-          <Tooltip title="Products">
-
-            <IconButton
-              onClick={() =>
-                openWindow(
-                  "product"
-                )
-              }
-            >
-              <Inventory2Icon />
-            </IconButton>
-
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* PRODUCT VARIANT */}
-          {/* ========================================= */}
-
-          <Tooltip
-            title="Product Variant Master"
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              minWidth: 190,
+              mr: 1,
+              userSelect: "none",
+            }}
           >
+            <Typography
+              sx={{
+                fontSize: 20,
+                fontWeight: 800,
+                color: "#1976d2",
+                letterSpacing: "-0.3px",
+              }}
+            >
+              MyBusinessAI
+            </Typography>
 
-            <IconButton
+            <Typography
+              sx={{
+                ml: 0.7,
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#64748b",
+                letterSpacing: 1,
+              }}
+            >
+              ERP
+            </Typography>
+          </Box>
+
+          {/* =================================================
+              DASHBOARD
+          ================================================== */}
+
+          <Button
+            startIcon={
+              <DashboardIcon />
+            }
+            onClick={() =>
+              openModule("dashboard")
+            }
+            sx={topMenuStyle}
+          >
+            Dashboard
+          </Button>
+
+          {/* =================================================
+              ADMINISTRATION
+          ================================================== */}
+
+          <Button
+            startIcon={
+              <AdminPanelSettingsIcon />
+            }
+            onClick={
+              handleAdministrationOpen
+            }
+            sx={topMenuStyle}
+          >
+            Administration
+          </Button>
+
+          <Menu
+            anchorEl={
+              administrationAnchor
+            }
+            open={Boolean(
+              administrationAnchor
+            )}
+            onClose={
+              handleAdministrationClose
+            }
+            MenuListProps={{
+              dense: true,
+            }}
+            PaperProps={{
+              sx: menuPaperStyle,
+            }}
+          >
+            <MenuSection title="MASTERS" />
+
+            <MenuItem
               onClick={() =>
-                openWindow(
-                  "product-variant"
-                )
+                openModule("company")
               }
             >
-              <WidgetsIcon />
-            </IconButton>
+              <BusinessIcon
+                sx={menuIconStyle}
+              />
+              Company Master
+            </MenuItem>
 
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* STOCK LEDGER */}
-          {/* ========================================= */}
-
-          <Tooltip title="Stock Ledger">
-
-            <IconButton
+            <MenuItem
               onClick={() =>
-                openWindow(
-                  "stock-ledger"
-                )
+                openModule("supplier")
               }
             >
-              <AccountBalanceWalletIcon />
-            </IconButton>
+              <LocalShippingIcon
+                sx={menuIconStyle}
+              />
+              Supplier Master
+            </MenuItem>
 
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* PURCHASE */}
-          {/* ========================================= */}
-
-          <Tooltip title="Purchase">
-
-            <IconButton
+            <MenuItem
               onClick={() =>
-                openWindow(
-                  "purchase"
-                )
+                openModule("customer")
               }
             >
+              <PeopleIcon
+                sx={menuIconStyle}
+              />
+              Customer Master
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("brand")
+              }
+            >
+              <BrandingWatermarkIcon
+                sx={menuIconStyle}
+              />
+              Brand Master
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("category")
+              }
+            >
+              <CategoryIcon
+                sx={menuIconStyle}
+              />
+              Category Master
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("color")
+              }
+            >
+              <PaletteIcon
+                sx={menuIconStyle}
+              />
+              Colour Master
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("size")
+              }
+            >
+              <StraightenIcon
+                sx={menuIconStyle}
+              />
+              Size Master
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("unit")
+              }
+            >
+              <ScaleIcon
+                sx={menuIconStyle}
+              />
+              Unit Master
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("product")
+              }
+            >
+              <Inventory2Icon
+                sx={menuIconStyle}
+              />
+              Product Master
+            </MenuItem>
+          </Menu>
+
+          {/* =================================================
+              TRANSACTIONS
+          ================================================== */}
+
+          <Button
+            startIcon={
               <ShoppingCartIcon />
-            </IconButton>
+            }
+            onClick={
+              handleTransactionsOpen
+            }
+            sx={topMenuStyle}
+          >
+            Transactions
+          </Button>
 
-          </Tooltip>
+          <Menu
+            anchorEl={
+              transactionsAnchor
+            }
+            open={Boolean(
+              transactionsAnchor
+            )}
+            onClose={
+              handleTransactionsClose
+            }
+            MenuListProps={{
+              dense: true,
+            }}
+            PaperProps={{
+              sx: menuPaperStyle,
+            }}
+          >
+            <MenuSection title="TRANSACTIONS" />
 
-
-          {/* ========================================= */}
-          {/* SALES */}
-          {/* ========================================= */}
-
-          <Tooltip title="Sales">
-
-            <IconButton
+            <MenuItem
               onClick={() =>
-                openWindow(
-                  "sales"
-                )
+                openModule("purchase")
               }
             >
-              <PointOfSaleIcon />
-            </IconButton>
+              <ShoppingBasketIcon
+                sx={menuIconStyle}
+              />
+              Purchase
+            </MenuItem>
 
-          </Tooltip>
-
-
-          {/* ========================================= */}
-          {/* REPORTS */}
-          {/* ========================================= */}
-
-          <Tooltip title="Reports">
-
-            <IconButton
+            <MenuItem
               onClick={() =>
-                openWindow(
-                  "reports"
-                )
+                openModule("sales")
               }
             >
+              <PointOfSaleIcon
+                sx={menuIconStyle}
+              />
+              Sales
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("stock-ledger")
+              }
+            >
+              <AccountBalanceWalletIcon
+                sx={menuIconStyle}
+              />
+              Stock Ledger
+            </MenuItem>
+          </Menu>
+
+          {/* =================================================
+              REPORTS
+          ================================================== */}
+
+          <Button
+            startIcon={
               <AssessmentIcon />
-            </IconButton>
+            }
+            onClick={
+              handleReportsOpen
+            }
+            sx={topMenuStyle}
+          >
+            Reports
+          </Button>
 
-          </Tooltip>
+          <Menu
+            anchorEl={reportsAnchor}
+            open={Boolean(
+              reportsAnchor
+            )}
+            onClose={
+              handleReportsClose
+            }
+            MenuListProps={{
+              dense: true,
+            }}
+            PaperProps={{
+              sx: {
+                ...menuPaperStyle,
+                minWidth: 270,
+              },
+            }}
+          >
+            <MenuSection title="REPORTS" />
 
-
-          {/* ========================================= */}
-          {/* SETTINGS */}
-          {/* ========================================= */}
-
-          <Tooltip title="Settings">
-
-            <IconButton
+            <MenuItem
               onClick={() =>
-                openWindow(
-                  "settings"
-                )
+                openModule("sales-register")
               }
             >
-              <SettingsIcon />
-            </IconButton>
+              <ReceiptLongIcon
+                sx={menuIconStyle}
+              />
+              Sales Register
+            </MenuItem>
 
+            <MenuItem
+              onClick={() =>
+                openModule("reports")
+              }
+            >
+              <AssessmentIcon
+                sx={menuIconStyle}
+              />
+              Reports Dashboard
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("customer")
+              }
+            >
+              <PeopleAltIcon
+                sx={menuIconStyle}
+              />
+              Customer Report
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("supplier")
+              }
+            >
+              <LocalShippingOutlinedIcon
+                sx={menuIconStyle}
+              />
+              Supplier Report
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("product")
+              }
+            >
+              <InventoryIcon
+                sx={menuIconStyle}
+              />
+              Product Report
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("purchase")
+              }
+            >
+              <ShoppingBagIcon
+                sx={menuIconStyle}
+              />
+              Purchase Report
+            </MenuItem>
+          </Menu>
+
+          {/* =================================================
+              PRINTING
+          ================================================== */}
+
+          <Button
+            startIcon={
+              <PrintIcon />
+            }
+            onClick={
+              handlePrintingOpen
+            }
+            sx={topMenuStyle}
+          >
+            Printing
+          </Button>
+
+          <Menu
+            anchorEl={printingAnchor}
+            open={Boolean(
+              printingAnchor
+            )}
+            onClose={
+              handlePrintingClose
+            }
+            MenuListProps={{
+              dense: true,
+            }}
+            PaperProps={{
+              sx: menuPaperStyle,
+            }}
+          >
+            <MenuSection title="PRINTING" />
+
+            <MenuItem
+              onClick={() =>
+                openModule("sales-register")
+              }
+            >
+              <ReceiptLongIcon
+                sx={menuIconStyle}
+              />
+              Sales Register
+            </MenuItem>
+
+            <MenuItem
+              onClick={() =>
+                openModule("reports")
+              }
+            >
+              <AssessmentIcon
+                sx={menuIconStyle}
+              />
+              Reports
+            </MenuItem>
+          </Menu>
+
+          {/* =================================================
+              SETTINGS
+          ================================================== */}
+
+          <Button
+            startIcon={
+              <SettingsIcon />
+            }
+            onClick={() =>
+              openModule("settings")
+            }
+            sx={topMenuStyle}
+          >
+            Settings
+          </Button>
+
+          {/* =================================================
+              RIGHT SIDE
+          ================================================== */}
+
+          <Box
+            sx={{
+              flexGrow: 1,
+            }}
+          />
+
+          <Tooltip title="Help">
+            <Button
+              sx={{
+                minWidth: 40,
+                width: 40,
+                height: 40,
+                p: 0,
+                color: "#475569",
+              }}
+            >
+              <HelpIcon />
+            </Button>
           </Tooltip>
 
-        </Box>
-
-
-        {/* ============================================= */}
-        {/* USER */}
-        {/* ============================================= */}
-
-        <Tooltip title="Account">
-
-          <IconButton>
-            <AccountCircleIcon />
-          </IconButton>
-
-        </Tooltip>
-
-      </Toolbar>
-
-    </AppBar>
-
+          <Tooltip title="Account">
+            <Button
+              sx={{
+                minWidth: 40,
+                width: 40,
+                height: 40,
+                p: 0,
+                color: "#475569",
+              }}
+            >
+              <AccountCircleIcon />
+            </Button>
+          </Tooltip>
+        </Toolbar>
+      </AppBar>
+    </>
   );
 }
+
+/* =========================================================
+   MENU SECTION TITLE
+========================================================= */
+
+function MenuSection({ title }) {
+  return (
+    <Box
+      sx={{
+        px: 2,
+        py: 0.8,
+        color: "#94a3b8",
+        fontSize: 10,
+        fontWeight: 800,
+        letterSpacing: 1,
+        userSelect: "none",
+      }}
+    >
+      {title}
+    </Box>
+  );
+}
+
+/* =========================================================
+   TOP MENU STYLE
+========================================================= */
+
+const topMenuStyle = {
+  minHeight: 42,
+  px: 1.1,
+  borderRadius: 1,
+  textTransform: "none",
+  fontWeight: 600,
+  fontSize: 13,
+  color: "#334155",
+  whiteSpace: "nowrap",
+
+  "&:hover": {
+    bgcolor: "#eaf2ff",
+    color: "#1976d2",
+  },
+
+  "& .MuiButton-startIcon": {
+    marginRight: 0.5,
+  },
+};
+
+/* =========================================================
+   DROPDOWN ICON
+========================================================= */
+
+const menuIconStyle = {
+  mr: 1.5,
+  fontSize: 20,
+  color: "#1976d2",
+};
+
+/* =========================================================
+   DROPDOWN PAPER
+========================================================= */
+
+const menuPaperStyle = {
+  mt: 0.8,
+  minWidth: 250,
+  borderRadius: 1.5,
+  border:
+    "1px solid #e2e8f0",
+  boxShadow:
+    "0 10px 35px rgba(15,23,42,0.18)",
+
+  "& .MuiMenuItem-root": {
+    minHeight: 42,
+    fontSize: 14,
+    borderRadius: 0.8,
+    mx: 0.5,
+    mb: 0.2,
+
+    "&:hover": {
+      bgcolor: "#eff6ff",
+      color: "#1976d2",
+    },
+  },
+};

@@ -27,6 +27,13 @@ const WindowRegistry = {
     height: 750,
   },
 
+  masters: {
+    id: "masters",
+    title: "Masters",
+    width: 1100,
+    height: 700,
+  },
+
   brand: {
     id: "brand",
     title: "Brand Master",
@@ -97,17 +104,17 @@ const WindowRegistry = {
     height: 750,
   },
 
-  inventory: {
-    id: "inventory",
-    title: "Inventory",
-    width: 1300,
-    height: 750,
-  },
-
   reports: {
     id: "reports",
     title: "Reports",
-    width: 1300,
+    width: 1100,
+    height: 700,
+  },
+
+  "sales-register": {
+    id: "sales-register",
+    title: "Sales Register",
+    width: 1350,
     height: 750,
   },
 

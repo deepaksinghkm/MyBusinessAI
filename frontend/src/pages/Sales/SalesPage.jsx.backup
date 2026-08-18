@@ -23,7 +23,6 @@ import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
-import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { createSale, getSales } from "../../api/salesApi";
 
@@ -110,16 +109,6 @@ export default function SalesPage() {
 
   const [success, setSuccess] =
     useState("");
-
-  // =====================================================
-  // SALES REGISTER
-  // =====================================================
-
-  const [salesRegister, setSalesRegister] =
-    useState([]);
-
-  const [registerLoading, setRegisterLoading] =
-    useState(false);
 
   // =====================================================
   // INVOICE NUMBER HELPERS
@@ -399,38 +388,6 @@ export default function SalesPage() {
       );
     }
   };
-
-  // =====================================================
-  // SALES REGISTER
-  // =====================================================
-
-  const loadSalesRegister = async () => {
-    try {
-      setRegisterLoading(true);
-
-      const result = await getSales();
-
-      setSalesRegister(
-        Array.isArray(result) ? result : []
-      );
-    } catch (err) {
-      console.error(
-        "SALES REGISTER LOAD ERROR:",
-        err
-      );
-
-      setError(
-        err.message ||
-          "Failed to load sales register"
-      );
-    } finally {
-      setRegisterLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadSalesRegister();
-  }, []);
 
   // =====================================================
   // CUSTOMER ADDRESS
@@ -936,7 +893,6 @@ export default function SalesPage() {
       });
 
       await loadMasterData();
-      await loadSalesRegister();
     } catch (err) {
       console.error(
         "SALE SAVE ERROR:",
@@ -1656,162 +1612,6 @@ export default function SalesPage() {
           View Last Invoice
         </Button>
       )}
-
-      {/* =================================================
-          SALES REGISTER
-      ================================================= */}
-
-      <Card sx={{ mb: 2 }}>
-        <CardContent>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 2,
-              mb: 2,
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                fontWeight={700}
-              >
-                Sales Register
-              </Typography>
-
-              <Typography
-                variant="body2"
-                color="text.secondary"
-              >
-                Saved sales invoices and totals.
-              </Typography>
-            </Box>
-
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={loadSalesRegister}
-              disabled={registerLoading}
-            >
-              {registerLoading
-                ? "Refreshing..."
-                : "Refresh"}
-            </Button>
-          </Box>
-
-          {salesRegister.length === 0 ? (
-            <Typography color="text.secondary">
-              {registerLoading
-                ? "Loading sales..."
-                : "No sales found."}
-            </Typography>
-          ) : (
-            <Box
-              sx={{
-                width: "100%",
-                overflowX: "auto",
-              }}
-            >
-              <Box
-                component="table"
-                sx={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  minWidth: 900,
-                  "& th, & td": {
-                    border: "1px solid",
-                    borderColor: "divider",
-                    p: 1,
-                    fontSize: 13,
-                    whiteSpace: "nowrap",
-                  },
-                  "& th": {
-                    bgcolor: "action.hover",
-                    fontWeight: 700,
-                    textAlign: "left",
-                  },
-                }}
-              >
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Sale No.</th>
-                    <th>Invoice No.</th>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Subtotal</th>
-                    <th>Tax</th>
-                    <th>Grand Total</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {salesRegister.map(
-                    (sale, index) => (
-                      <tr key={sale.id}>
-                        <td>{index + 1}</td>
-
-                        <td>
-                          {sale.sale_no || "-"}
-                        </td>
-
-                        <td>
-                          <strong>
-                            {sale.invoice_no ||
-                              "-"}
-                          </strong>
-                        </td>
-
-                        <td>
-                          {sale.sale_date || "-"}
-                        </td>
-
-                        <td>
-                          {sale.customer_name ||
-                            "-"}
-                        </td>
-
-                        <td>
-                          {Array.isArray(
-                            sale.items
-                          )
-                            ? sale.items.length
-                            : 0}
-                        </td>
-
-                        <td>
-                          ₹
-                          {formatMoney(
-                            sale.subtotal
-                          )}
-                        </td>
-
-                        <td>
-                          ₹
-                          {formatMoney(
-                            sale.tax
-                          )}
-                        </td>
-
-                        <td>
-                          <strong>
-                            ₹
-                            {formatMoney(
-                              sale.grand_total
-                            )}
-                          </strong>
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </Box>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
 
       {/* =================================================
           SALE + CUSTOMER DETAILS

@@ -26,6 +26,18 @@ class SaleCreate(BaseModel):
 
     sale_date: date
 
+    # =====================================================
+    # BILL TO / SHIP TO
+    # =====================================================
+
+    bill_to_customer_id: Optional[int] = None
+
+    ship_to_customer_id: Optional[int] = None
+
+    # =====================================================
+    # OLD CUSTOMER DETAILS
+    # =====================================================
+
     customer_name: Optional[str] = None
 
     customer_mobile: Optional[str] = None
@@ -73,6 +85,18 @@ class SaleResponse(BaseModel):
     sale_no: str
 
     sale_date: date
+
+    # =====================================================
+    # BILL TO / SHIP TO
+    # =====================================================
+
+    bill_to_customer_id: Optional[int]
+
+    ship_to_customer_id: Optional[int]
+
+    # =====================================================
+    # OLD CUSTOMER DETAILS
+    # =====================================================
 
     customer_name: Optional[str]
 

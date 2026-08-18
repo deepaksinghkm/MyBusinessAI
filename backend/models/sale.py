@@ -36,6 +36,27 @@ class Sale(Base):
         nullable=False,
     )
 
+    # =====================================================
+    # BILL TO / SHIP TO
+    # =====================================================
+
+    bill_to_customer_id = Column(
+        Integer,
+        ForeignKey("customers.id"),
+        nullable=True,
+    )
+
+    ship_to_customer_id = Column(
+        Integer,
+        ForeignKey("customers.id"),
+        nullable=True,
+    )
+
+    # =====================================================
+    # OLD CUSTOMER DETAILS
+    # Kept for backward compatibility
+    # =====================================================
+
     customer_name = Column(
         String(200),
         nullable=True,
@@ -55,6 +76,10 @@ class Sale(Base):
         String(500),
         nullable=True,
     )
+
+    # =====================================================
+    # TOTALS
+    # =====================================================
 
     subtotal = Column(
         Numeric(12, 2),
@@ -86,6 +111,24 @@ class Sale(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
+
+    # =====================================================
+    # CUSTOMER RELATIONSHIPS
+    # =====================================================
+
+    bill_to_customer = relationship(
+        "Customer",
+        foreign_keys=[bill_to_customer_id],
+    )
+
+    ship_to_customer = relationship(
+        "Customer",
+        foreign_keys=[ship_to_customer_id],
+    )
+
+    # =====================================================
+    # SALE ITEMS
+    # =====================================================
 
     items = relationship(
         "SaleItem",
@@ -152,5 +195,5 @@ class SaleItem(Base):
     )
 
     variant = relationship(
-        "ProductVariant"
+        "ProductVariant",
     )

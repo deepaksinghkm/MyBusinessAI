@@ -61,51 +61,28 @@ export default function ProductPage() {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [variantSaving, setVariantSaving] =
-    useState(false);
-  const [uploadingImage, setUploadingImage] =
-    useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const [search, setSearch] = useState("");
 
-  const [dialogOpen, setDialogOpen] =
-    useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const [editingProduct, setEditingProduct] =
-    useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const [form, setForm] = useState({
     ...EMPTY_FORM,
   });
 
-  const [variantForm, setVariantForm] =
-    useState({
-      ...EMPTY_VARIANT,
-    });
+  const [variantForm, setVariantForm] = useState({
+    ...EMPTY_VARIANT,
+  });
 
-  const [variantEditId, setVariantEditId] =
-    useState(null);
+  const [variantSaving, setVariantSaving] = useState(false);
 
-  // =====================================================
-  // NORMALIZE API DATA
-  // =====================================================
-
-  const normalizeList = (data, keys = []) => {
-    if (Array.isArray(data)) {
-      return data;
-    }
-
-    for (const key of keys) {
-      if (Array.isArray(data?.[key])) {
-        return data[key];
-      }
-    }
-
-    return [];
-  };
+  const [variantEditId, setVariantEditId] = useState(null);
 
   // =====================================================
   // LOAD PRODUCTS
@@ -127,9 +104,7 @@ export default function ProductPage() {
       }
 
       setProducts(
-        normalizeList(data, [
-          "products",
-        ])
+        Array.isArray(data) ? data : []
       );
     } catch (err) {
       setError(
@@ -209,35 +184,33 @@ export default function ProductPage() {
       }
 
       setBrands(
-        normalizeList(brandData, [
-          "brands",
-        ])
+        Array.isArray(brandData)
+          ? brandData
+          : []
       );
 
       setCategories(
-        normalizeList(categoryData, [
-          "categories",
-        ])
+        Array.isArray(categoryData)
+          ? categoryData
+          : []
       );
 
       setColors(
-        normalizeList(colorData, [
-          "colors",
-        ])
+        Array.isArray(colorData)
+          ? colorData
+          : []
       );
 
       setSizes(
-        normalizeList(sizeData, [
-          "sizes",
-        ])
+        Array.isArray(sizeData)
+          ? sizeData
+          : []
       );
 
-      // IMPORTANT:
-      // Unit Master ke saare records yahan aayenge.
       setUnits(
-        normalizeList(unitData, [
-          "units",
-        ])
+        Array.isArray(unitData)
+          ? unitData
+          : []
       );
     } catch (err) {
       setError(
@@ -251,9 +224,7 @@ export default function ProductPage() {
   // LOAD VARIANTS
   // =====================================================
 
-  const loadVariants = async (
-    productId
-  ) => {
+  const loadVariants = async (productId) => {
     if (!productId) {
       setVariants([]);
       return;
@@ -273,19 +244,17 @@ export default function ProductPage() {
         );
       }
 
-      const list = normalizeList(data, [
-        "variants",
-        "product_variants",
-      ]);
+      const productVariants =
+        Array.isArray(data)
+          ? data.filter(
+              (variant) =>
+                Number(
+                  variant.product_id
+                ) === Number(productId)
+            )
+          : [];
 
-      setVariants(
-        list.filter(
-          (variant) =>
-            Number(
-              variant.product_id
-            ) === Number(productId)
-        )
-      );
+      setVariants(productVariants);
     } catch (err) {
       setError(
         err.message ||
@@ -316,7 +285,7 @@ export default function ProductPage() {
   }, []);
 
   // =====================================================
-  // ADD PRODUCT
+  // OPEN ADD
   // =====================================================
 
   const handleAdd = () => {
@@ -334,18 +303,14 @@ export default function ProductPage() {
 
     setVariantEditId(null);
 
-    // IMPORTANT:
-    // Variant section ADD mode mein bhi visible hoga.
     setDialogOpen(true);
   };
 
   // =====================================================
-  // EDIT PRODUCT
+  // OPEN EDIT
   // =====================================================
 
-  const handleEdit = async (
-    product
-  ) => {
+  const handleEdit = async (product) => {
     setEditingProduct(product);
 
     setForm({
@@ -372,9 +337,7 @@ export default function ProductPage() {
 
     setDialogOpen(true);
 
-    await loadVariants(
-      product.id
-    );
+    await loadVariants(product.id);
   };
 
   // =====================================================
@@ -384,8 +347,8 @@ export default function ProductPage() {
   const handleClose = () => {
     if (
       saving ||
-      variantSaving ||
-      uploadingImage
+      uploadingImage ||
+      variantSaving
     ) {
       return;
     }
@@ -408,63 +371,19 @@ export default function ProductPage() {
   };
 
   // =====================================================
-  // RATE CALCULATION
+  // FORM CHANGE
   // =====================================================
 
-  // Rate = MRP - (MRP * Discount %) / 100
-  // Discount is product-level and is same for all variants.
-  const calculateRate = (mrp, discount) => {
-    const mrpValue = Number(mrp);
-    const discountValue = Number(discount);
-
-    if (
-      Number.isNaN(mrpValue) ||
-      mrpValue < 0
-    ) {
-      return "";
-    }
-
-    const safeDiscount =
-      Number.isNaN(discountValue)
-        ? 0
-        : Math.min(100, Math.max(0, discountValue));
-
-    return (
-      mrpValue -
-      (mrpValue * safeDiscount) / 100
-    ).toFixed(2);
-  };
-
-  // =====================================================
-  // PRODUCT FORM CHANGE
-  // =====================================================
-
-  const handleChange = (
-    event
-  ) => {
+  const handleChange = (event) => {
     const {
       name,
       value,
     } = event.target;
 
-    setForm(
-      (previous) => ({
-        ...previous,
-        [name]: value,
-      })
-    );
-
-    // Discount change hone par current variant ka
-    // Rate bhi turant recalculate hoga.
-    if (name === "discount_percent") {
-      setVariantForm((previous) => ({
-        ...previous,
-        rate: calculateRate(
-          previous.mrp,
-          value
-        ),
-      }));
-    }
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   };
 
   // =====================================================
@@ -479,22 +398,12 @@ export default function ProductPage() {
       value,
     } = event.target;
 
-    setVariantForm((previous) => {
-      const next = {
+    setVariantForm(
+      (previous) => ({
         ...previous,
         [name]: value,
-      };
-
-      // MRP enter/change karte hi Rate automatic calculate hoga.
-      if (name === "mrp") {
-        next.rate = calculateRate(
-          value,
-          form.discount_percent
-        );
-      }
-
-      return next;
-    });
+      })
+    );
   };
 
   // =====================================================
@@ -511,10 +420,7 @@ export default function ProductPage() {
       return;
     }
 
-    if (
-      file.size >
-      150 * 1024
-    ) {
+    if (file.size > 150 * 1024) {
       setError(
         "Image must be under 150 KB."
       );
@@ -578,9 +484,7 @@ export default function ProductPage() {
         (previous) => ({
           ...previous,
           image:
-            result.path ||
-            result.image ||
-            "",
+            result.path || "",
         })
       );
 
@@ -594,7 +498,6 @@ export default function ProductPage() {
       );
     } finally {
       setUploadingImage(false);
-
       event.target.value = "";
     }
   };
@@ -630,11 +533,14 @@ export default function ProductPage() {
     }
 
     if (
-      Number(
-        form.packing_qty || 0
-      ) < 0
+      form.packing_qty !== "" &&
+      Number(form.packing_qty) < 0
     ) {
       return "Packing Quantity cannot be negative.";
+    }
+
+    if (!form.image) {
+      return "Please upload Product Image.";
     }
 
     return "";
@@ -650,7 +556,7 @@ export default function ProductPage() {
 
     if (validation) {
       setError(validation);
-      return null;
+      return;
     }
 
     try {
@@ -671,8 +577,7 @@ export default function ProductPage() {
           ),
 
         image:
-          form.image.trim() ||
-          null,
+          form.image.trim(),
 
         packing_qty:
           Number(
@@ -688,15 +593,13 @@ export default function ProductPage() {
           null,
       };
 
-      const url =
-        editingProduct
-          ? `${API_BASE_URL}/products/${editingProduct.id}`
-          : `${API_BASE_URL}/products/`;
+      const url = editingProduct
+        ? `${API_BASE_URL}/products/${editingProduct.id}`
+        : `${API_BASE_URL}/products/`;
 
-      const method =
-        editingProduct
-          ? "PUT"
-          : "POST";
+      const method = editingProduct
+        ? "PUT"
+        : "POST";
 
       const response =
         await fetch(url, {
@@ -721,31 +624,32 @@ export default function ProductPage() {
         );
       }
 
-      // IMPORTANT:
-      // New Product ke baad product ID mil jayegi.
-      // Iske baad same screen par variants add honge.
-      setEditingProduct(result);
+      if (editingProduct) {
+        setEditingProduct(result);
+
+        await loadVariants(
+          result.id
+        );
+      } else {
+        setEditingProduct(result);
+
+        await loadVariants(
+          result.id
+        );
+      }
 
       await loadProducts();
-
-      await loadVariants(
-        result.id
-      );
 
       setSuccess(
         editingProduct
           ? "Product updated successfully."
-          : "Product saved. Now add product variants."
+          : "Product created successfully."
       );
-
-      return result;
     } catch (err) {
       setError(
         err.message ||
           "Failed to save product"
       );
-
-      return null;
     } finally {
       setSaving(false);
     }
@@ -769,7 +673,7 @@ export default function ProductPage() {
 
   const validateVariant = () => {
     if (!editingProduct?.id) {
-      return "First save the Product, then add Variant.";
+      return "Please save the product first.";
     }
 
     if (!variantForm.color_id) {
@@ -814,9 +718,7 @@ export default function ProductPage() {
 
     if (
       !variantEditId &&
-      Number(
-        variantForm.stock
-      ) < 0
+      Number(variantForm.stock) < 0
     ) {
       return "Stock cannot be negative.";
     }
@@ -825,7 +727,7 @@ export default function ProductPage() {
   };
 
   // =====================================================
-  // SAVE VARIANT
+  // ADD / UPDATE VARIANT
   // =====================================================
 
   const handleSaveVariant = async () => {
@@ -903,7 +805,6 @@ export default function ProductPage() {
               body:
                 JSON.stringify({
                   ...payload,
-
                   stock:
                     Number(
                       variantForm.stock ||
@@ -971,12 +872,8 @@ export default function ProductPage() {
       mrp:
         variant.mrp ?? "",
 
-      // Existing variant ko edit karte waqt bhi
-      // current product discount ke according Rate show hoga.
-      rate: calculateRate(
-        variant.mrp ?? "",
-        form.discount_percent
-      ),
+      rate:
+        variant.rate ?? "",
 
       stock:
         variant.stock ?? 0,
@@ -1295,9 +1192,11 @@ export default function ProductPage() {
               <Typography
                 variant="body2"
                 color="text.secondary"
+                sx={{ mt: 0.5 }}
               >
-                Manage products and
-                multiple product
+                Manage products and their
+                colour, size, unit,
+                MRP, rate and stock
                 variants.
               </Typography>
             </Box>
@@ -1335,7 +1234,7 @@ export default function ProductPage() {
       </Card>
 
       {/* ================================================= */}
-      {/* PRODUCT LIST */}
+      {/* PRODUCT TABLE */}
       {/* ================================================= */}
 
       <Card
@@ -1352,14 +1251,12 @@ export default function ProductPage() {
             sx={{
               display: "grid",
               gridTemplateColumns:
-                "70px 90px 2fr 1fr 1fr 100px 150px",
+                "70px 90px 2fr 1fr 1fr 100px 180px",
               gap: 1,
-              alignItems:
-                "center",
+              alignItems: "center",
               px: 1,
               py: 1.5,
-              bgcolor:
-                "#f1f5f9",
+              bgcolor: "#f1f5f9",
               borderRadius: 1,
               fontWeight: 700,
               fontSize: 13,
@@ -1378,30 +1275,34 @@ export default function ProductPage() {
             <Box
               sx={{
                 py: 5,
-                textAlign:
-                  "center",
+                textAlign: "center",
               }}
             >
-              Loading products...
+              <Typography>
+                Loading products...
+              </Typography>
             </Box>
           ) : filteredProducts.length ===
             0 ? (
             <Box
               sx={{
                 py: 5,
-                textAlign:
-                  "center",
-                color:
-                  "#64748b",
+                textAlign: "center",
               }}
             >
               <Inventory2Icon
                 sx={{
                   fontSize: 45,
+                  color: "#94a3b8",
                 }}
               />
 
-              <Typography>
+              <Typography
+                sx={{
+                  mt: 1,
+                  color: "#64748b",
+                }}
+              >
                 No products found.
               </Typography>
             </Box>
@@ -1409,14 +1310,11 @@ export default function ProductPage() {
             filteredProducts.map(
               (product) => (
                 <Box
-                  key={
-                    product.id
-                  }
+                  key={product.id}
                   sx={{
-                    display:
-                      "grid",
+                    display: "grid",
                     gridTemplateColumns:
-                      "70px 90px 2fr 1fr 1fr 100px 150px",
+                      "70px 90px 2fr 1fr 1fr 100px 180px",
                     gap: 1,
                     alignItems:
                       "center",
@@ -1464,9 +1362,7 @@ export default function ProductPage() {
                     <Typography
                       fontWeight={600}
                     >
-                      {
-                        product.name
-                      }
+                      {product.name}
                     </Typography>
 
                     <Typography
@@ -1499,8 +1395,7 @@ export default function ProductPage() {
 
                   <Box
                     sx={{
-                      fontWeight:
-                        700,
+                      fontWeight: 700,
                     }}
                   >
                     {Number(
@@ -1512,8 +1407,7 @@ export default function ProductPage() {
 
                   <Box
                     sx={{
-                      display:
-                        "flex",
+                      display: "flex",
                       gap: 0.5,
                     }}
                   >
@@ -1572,9 +1466,7 @@ export default function ProductPage() {
             : "Add Product"}
         </DialogTitle>
 
-        <DialogContent
-          dividers
-        >
+        <DialogContent dividers>
           {/* ================================================= */}
           {/* PRODUCT INFORMATION */}
           {/* ================================================= */}
@@ -1599,9 +1491,7 @@ export default function ProductPage() {
             <TextField
               label="Product Name"
               name="name"
-              value={
-                form.name
-              }
+              value={form.name}
               onChange={
                 handleChange
               }
@@ -1629,12 +1519,8 @@ export default function ProductPage() {
               {brands.map(
                 (brand) => (
                   <MenuItem
-                    key={
-                      brand.id
-                    }
-                    value={
-                      brand.id
-                    }
+                    key={brand.id}
+                    value={brand.id}
                   >
                     {brand.name ||
                       brand.brand_name}
@@ -1663,12 +1549,8 @@ export default function ProductPage() {
               {categories.map(
                 (category) => (
                   <MenuItem
-                    key={
-                      category.id
-                    }
-                    value={
-                      category.id
-                    }
+                    key={category.id}
+                    value={category.id}
                   >
                     {category.name ||
                       category.category_name}
@@ -1688,12 +1570,13 @@ export default function ProductPage() {
                 handleChange
               }
               fullWidth
+              required
               inputProps={{
                 min: 0,
                 max: 100,
                 step: 0.01,
               }}
-              helperText="Same discount for all variants"
+              helperText="Same discount will apply to all variants."
             />
 
             <TextField
@@ -1713,6 +1596,7 @@ export default function ProductPage() {
             />
 
             <TextField
+              select
               label="Packing Type"
               name="packing_type"
               value={
@@ -1722,8 +1606,23 @@ export default function ProductPage() {
                 handleChange
               }
               fullWidth
-              placeholder="Carton"
-            />
+            >
+              <MenuItem value="Carton">
+                Carton
+              </MenuItem>
+
+              <MenuItem value="Box">
+                Box
+              </MenuItem>
+
+              <MenuItem value="Pair">
+                Pair
+              </MenuItem>
+
+              <MenuItem value="Piece">
+                Piece
+              </MenuItem>
+            </TextField>
 
             <TextField
               label="Description"
@@ -1750,6 +1649,7 @@ export default function ProductPage() {
                   "1px dashed #cbd5e1",
                 borderRadius: 1,
                 p: 1.5,
+                minHeight: 100,
               }}
             >
               <Typography
@@ -1761,8 +1661,7 @@ export default function ProductPage() {
 
               <Box
                 sx={{
-                  display:
-                    "flex",
+                  display: "flex",
                   alignItems:
                     "center",
                   gap: 1.5,
@@ -1822,14 +1721,13 @@ export default function ProductPage() {
           </Box>
 
           {/* ================================================= */}
-          {/* PRODUCT SAVE */}
+          {/* SAVE PRODUCT */}
           {/* ================================================= */}
 
           <Box
             sx={{
               mt: 2,
-              display:
-                "flex",
+              display: "flex",
               justifyContent:
                 "flex-end",
             }}
@@ -1853,538 +1751,457 @@ export default function ProductPage() {
           </Box>
 
           {/* ================================================= */}
-          {/* VARIANT SECTION - ALWAYS VISIBLE */}
+          {/* VARIANTS */}
           {/* ================================================= */}
 
-          <Divider
-            sx={{ my: 3 }}
-          />
-
-          <Box
-            sx={{
-              display:
-                "flex",
-              justifyContent:
-                "space-between",
-              alignItems:
-                "center",
-              mb: 2,
-            }}
-          >
-            <Box>
-              <Typography
-                fontWeight={700}
-              >
-                Product Variants
-              </Typography>
-
-              <Typography
-                variant="body2"
-                color="text.secondary"
-              >
-                Multiple Colour,
-                Size and Unit
-                combinations can
-                be added here.
-              </Typography>
-            </Box>
-
-            {editingProduct && (
-              <Button
-                variant="outlined"
-                startIcon={
-                  <AddIcon />
-                }
-                onClick={
-                  resetVariantForm
-                }
-              >
-                New Variant
-              </Button>
-            )}
-          </Box>
-
-          {/* ================================================= */}
-          {/* VARIANT FORM */}
-          {/* ================================================= */}
-
-          <Box
-            sx={{
-              p: 2,
-              border:
-                "1px solid #e2e8f0",
-              borderRadius: 2,
-              bgcolor:
-                editingProduct
-                  ? "#f8fafc"
-                  : "#f1f5f9",
-            }}
-          >
-            {!editingProduct && (
-              <Alert
-                severity="info"
-                sx={{ mb: 2 }}
-              >
-                First save the Product
-                using "Save Product".
-                After saving, you can
-                immediately add Colour,
-                Size, Unit, MRP, Rate
-                and Stock variants here.
-              </Alert>
-            )}
-
-            <Typography
-              fontWeight={600}
-              sx={{ mb: 2 }}
-            >
-              {variantEditId
-                ? "Edit Variant"
-                : "Add Variant"}
-            </Typography>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "repeat(6, 1fr)",
-                },
-                gap: 1.5,
-              }}
-            >
-              {/* COLOUR */}
-
-              <TextField
-                select
-                size="small"
-                label="Colour"
-                name="color_id"
-                value={
-                  variantForm.color_id
-                }
-                onChange={
-                  handleVariantChange
-                }
-                disabled={
-                  !editingProduct ||
-                  variantSaving
-                }
-                fullWidth
-              >
-                <MenuItem value="">
-                  Select Colour
-                </MenuItem>
-
-                {colors.map(
-                  (color) => (
-                    <MenuItem
-                      key={
-                        color.id
-                      }
-                      value={
-                        color.id
-                      }
-                    >
-                      {color.name ||
-                        color.code}
-                    </MenuItem>
-                  )
-                )}
-              </TextField>
-
-              {/* SIZE */}
-
-              <TextField
-                select
-                size="small"
-                label="Size"
-                name="size_id"
-                value={
-                  variantForm.size_id
-                }
-                onChange={
-                  handleVariantChange
-                }
-                disabled={
-                  !editingProduct ||
-                  variantSaving
-                }
-                fullWidth
-              >
-                <MenuItem value="">
-                  Select Size
-                </MenuItem>
-
-                {sizes.map(
-                  (size) => (
-                    <MenuItem
-                      key={
-                        size.id
-                      }
-                      value={
-                        size.id
-                      }
-                    >
-                      {size.name ||
-                        size.code}
-                    </MenuItem>
-                  )
-                )}
-              </TextField>
-
-              {/* UNIT */}
-
-              <TextField
-                select
-                size="small"
-                label="Unit"
-                name="unit_id"
-                value={
-                  variantForm.unit_id
-                }
-                onChange={
-                  handleVariantChange
-                }
-                disabled={
-                  !editingProduct ||
-                  variantSaving
-                }
-                fullWidth
-              >
-                <MenuItem value="">
-                  Select Unit
-                </MenuItem>
-
-                {units.map(
-                  (unit) => (
-                    <MenuItem
-                      key={
-                        unit.id
-                      }
-                      value={
-                        unit.id
-                      }
-                    >
-                      {unit.name ||
-                        unit.short_name ||
-                        unit.code}
-                    </MenuItem>
-                  )
-                )}
-              </TextField>
-
-              {/* MRP */}
-
-              <TextField
-                size="small"
-                label="MRP"
-                name="mrp"
-                type="number"
-                value={
-                  variantForm.mrp
-                }
-                onChange={
-                  handleVariantChange
-                }
-                disabled={
-                  !editingProduct ||
-                  variantSaving
-                }
-                fullWidth
-                inputProps={{
-                  min: 0,
-                  step: 0.01,
-                }}
+          {editingProduct && (
+            <>
+              <Divider
+                sx={{ my: 3 }}
               />
 
-              {/* RATE */}
-
-              <TextField
-                size="small"
-                label="Rate"
-                name="rate"
-                type="number"
-                value={
-                  variantForm.rate
-                }
-                onChange={
-                  handleVariantChange
-                }
-                disabled={
-                  !editingProduct ||
-                  variantSaving
-                }
-                fullWidth
-                InputProps={{
-                  readOnly: true,
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems:
+                    "center",
+                  mb: 2,
                 }}
-                inputProps={{
-                  min: 0,
-                  step: 0.01,
-                }}
-                helperText={
-                  form.discount_percent
-                    ? `Auto: MRP - ${form.discount_percent}% discount`
-                    : "Auto calculated from MRP"
-                }
-              />
+              >
+                <Box>
+                  <Typography
+                    fontWeight={700}
+                  >
+                    Product Variants
+                  </Typography>
 
-              {/* STOCK */}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                    Add multiple Colour,
+                    Size and Unit
+                    combinations with
+                    different MRP and
+                    Rate.
+                  </Typography>
+                </Box>
 
-              <TextField
-                size="small"
-                label="Opening Stock"
-                name="stock"
-                type="number"
-                value={
-                  variantForm.stock
-                }
-                onChange={
-                  handleVariantChange
-                }
-                disabled={
-                  !editingProduct ||
-                  Boolean(
-                    variantEditId
-                  ) ||
-                  variantSaving
-                }
-                fullWidth
-                inputProps={{
-                  min: 0,
-                }}
-              />
-            </Box>
-
-            <Box
-              sx={{
-                display:
-                  "flex",
-                justifyContent:
-                  "flex-end",
-                gap: 1,
-                mt: 2,
-              }}
-            >
-              {variantEditId && (
                 <Button
                   variant="outlined"
+                  startIcon={
+                    <AddIcon />
+                  }
                   onClick={
                     resetVariantForm
                   }
-                  disabled={
-                    variantSaving
-                  }
                 >
-                  Cancel
+                  New Variant
                 </Button>
-              )}
+              </Box>
 
-              <Button
-                variant="contained"
-                startIcon={
-                  <AddIcon />
-                }
-                onClick={
-                  handleSaveVariant
-                }
-                disabled={
-                  !editingProduct ||
-                  variantSaving
-                }
-              >
-                {variantSaving
-                  ? "Saving..."
-                  : variantEditId
-                  ? "Update Variant"
-                  : "Add Variant"}
-              </Button>
-            </Box>
-          </Box>
+              {/* VARIANT FORM */}
 
-          {/* ================================================= */}
-          {/* VARIANT TABLE */}
-          {/* ================================================= */}
-
-          <Box
-            sx={{
-              mt: 2,
-              overflowX:
-                "auto",
-            }}
-          >
-            <Box
-              sx={{
-                minWidth: 850,
-              }}
-            >
               <Box
                 sx={{
-                  display:
-                    "grid",
-                  gridTemplateColumns:
-                    "1.2fr 1fr 1fr 1fr 1fr 1fr 110px",
-                  gap: 1,
-                  alignItems:
-                    "center",
-                  px: 1,
-                  py: 1.2,
-                  bgcolor:
-                    "#e2e8f0",
-                  borderRadius: 1,
-                  fontWeight: 700,
-                  fontSize: 13,
+                  p: 2,
+                  border:
+                    "1px solid #e2e8f0",
+                  borderRadius: 2,
+                  bgcolor: "#f8fafc",
                 }}
               >
-                <Box>
-                  Colour
+                <Typography
+                  fontWeight={600}
+                  sx={{ mb: 2 }}
+                >
+                  {variantEditId
+                    ? "Edit Variant"
+                    : "Add Variant"}
+                </Typography>
+
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      md: "repeat(6, 1fr)",
+                    },
+                    gap: 1.5,
+                  }}
+                >
+                  <TextField
+                    select
+                    size="small"
+                    label="Colour"
+                    name="color_id"
+                    value={
+                      variantForm.color_id
+                    }
+                    onChange={
+                      handleVariantChange
+                    }
+                    fullWidth
+                  >
+                    <MenuItem value="">
+                      Select Colour
+                    </MenuItem>
+
+                    {colors.map(
+                      (color) => (
+                        <MenuItem
+                          key={color.id}
+                          value={color.id}
+                        >
+                          {color.name ||
+                            color.code}
+                        </MenuItem>
+                      )
+                    )}
+                  </TextField>
+
+                  <TextField
+                    select
+                    size="small"
+                    label="Size"
+                    name="size_id"
+                    value={
+                      variantForm.size_id
+                    }
+                    onChange={
+                      handleVariantChange
+                    }
+                    fullWidth
+                  >
+                    <MenuItem value="">
+                      Select Size
+                    </MenuItem>
+
+                    {sizes.map(
+                      (size) => (
+                        <MenuItem
+                          key={size.id}
+                          value={size.id}
+                        >
+                          {size.name ||
+                            size.code}
+                        </MenuItem>
+                      )
+                    )}
+                  </TextField>
+
+                  <TextField
+                    select
+                    size="small"
+                    label="Unit"
+                    name="unit_id"
+                    value={
+                      variantForm.unit_id
+                    }
+                    onChange={
+                      handleVariantChange
+                    }
+                    fullWidth
+                  >
+                    <MenuItem value="">
+                      Select Unit
+                    </MenuItem>
+
+                    {units.map(
+                      (unit) => (
+                        <MenuItem
+                          key={unit.id}
+                          value={unit.id}
+                        >
+                          {unit.name ||
+                            unit.short_name ||
+                            unit.code}
+                        </MenuItem>
+                      )
+                    )}
+                  </TextField>
+
+                  <TextField
+                    size="small"
+                    label="MRP"
+                    name="mrp"
+                    type="number"
+                    value={
+                      variantForm.mrp
+                    }
+                    onChange={
+                      handleVariantChange
+                    }
+                    fullWidth
+                    inputProps={{
+                      min: 0,
+                      step: 0.01,
+                    }}
+                  />
+
+                  <TextField
+                    size="small"
+                    label="Rate"
+                    name="rate"
+                    type="number"
+                    value={
+                      variantForm.rate
+                    }
+                    onChange={
+                      handleVariantChange
+                    }
+                    fullWidth
+                    inputProps={{
+                      min: 0,
+                      step: 0.01,
+                    }}
+                  />
+
+                  {!variantEditId && (
+                    <TextField
+                      size="small"
+                      label="Opening Stock"
+                      name="stock"
+                      type="number"
+                      value={
+                        variantForm.stock
+                      }
+                      onChange={
+                        handleVariantChange
+                      }
+                      fullWidth
+                      inputProps={{
+                        min: 0,
+                      }}
+                    />
+                  )}
                 </Box>
 
-                <Box>
-                  Size
-                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent:
+                      "flex-end",
+                    gap: 1,
+                    mt: 2,
+                  }}
+                >
+                  {variantEditId && (
+                    <Button
+                      variant="outlined"
+                      onClick={
+                        resetVariantForm
+                      }
+                    >
+                      Cancel
+                    </Button>
+                  )}
 
-                <Box>
-                  Unit
-                </Box>
-
-                <Box>
-                  MRP
-                </Box>
-
-                <Box>
-                  Rate
-                </Box>
-
-                <Box>
-                  Stock
-                </Box>
-
-                <Box>
-                  Action
+                  <Button
+                    variant="contained"
+                    startIcon={
+                      <AddIcon />
+                    }
+                    onClick={
+                      handleSaveVariant
+                    }
+                    disabled={
+                      variantSaving
+                    }
+                  >
+                    {variantSaving
+                      ? "Saving..."
+                      : variantEditId
+                      ? "Update Variant"
+                      : "Add Variant"}
+                  </Button>
                 </Box>
               </Box>
 
-              {variants.length ===
-              0 ? (
+              {/* VARIANT TABLE */}
+
+              <Box
+                sx={{
+                  mt: 2,
+                  overflowX: "auto",
+                }}
+              >
                 <Box
                   sx={{
-                    textAlign:
-                      "center",
-                    py: 4,
-                    color:
-                      "#64748b",
+                    minWidth: 850,
                   }}
                 >
-                  {editingProduct
-                    ? "No variants added yet."
-                    : "Variants will be available after saving the product."}
-                </Box>
-              ) : (
-                variants.map(
-                  (variant) => (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "1.2fr 1fr 1fr 1fr 1fr 1fr 110px",
+                      gap: 1,
+                      alignItems:
+                        "center",
+                      px: 1,
+                      py: 1.2,
+                      bgcolor:
+                        "#e2e8f0",
+                      borderRadius: 1,
+                      fontWeight: 700,
+                      fontSize: 13,
+                    }}
+                  >
+                    <Box>
+                      Colour
+                    </Box>
+
+                    <Box>
+                      Size
+                    </Box>
+
+                    <Box>
+                      Unit
+                    </Box>
+
+                    <Box>
+                      MRP
+                    </Box>
+
+                    <Box>
+                      Rate
+                    </Box>
+
+                    <Box>
+                      Stock
+                    </Box>
+
+                    <Box>
+                      Action
+                    </Box>
+                  </Box>
+
+                  {variants.length ===
+                  0 ? (
                     <Box
-                      key={
-                        variant.id
-                      }
                       sx={{
-                        display:
-                          "grid",
-                        gridTemplateColumns:
-                          "1.2fr 1fr 1fr 1fr 1fr 1fr 110px",
-                        gap: 1,
-                        alignItems:
+                        textAlign:
                           "center",
-                        px: 1,
-                        py: 1,
-                        borderBottom:
-                          "1px solid #e2e8f0",
-                        fontSize: 13,
+                        py: 4,
+                        color:
+                          "#64748b",
                       }}
                     >
-                      <Box>
-                        {getColorName(
-                          variant.color_id
-                        )}
-                      </Box>
-
-                      <Box>
-                        {getSizeName(
-                          variant.size_id
-                        )}
-                      </Box>
-
-                      <Box>
-                        {getUnitName(
-                          variant.unit_id
-                        )}
-                      </Box>
-
-                      <Box>
-                        ₹
-                        {Number(
-                          variant.mrp ||
-                            0
-                        ).toFixed(2)}
-                      </Box>
-
-                      <Box>
-                        ₹
-                        {Number(
-                          variant.rate ||
-                            0
-                        ).toFixed(2)}
-                      </Box>
-
-                      <Box>
-                        {
-                          variant.stock ??
-                          0
-                        }
-                      </Box>
-
-                      <Box
-                        sx={{
-                          display:
-                            "flex",
-                          gap: 0.25,
-                        }}
-                      >
-                        <Tooltip title="Edit Variant">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() =>
-                              handleEditVariant(
-                                variant
-                              )
-                            }
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Delete Variant">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() =>
-                              handleDeleteVariant(
-                                variant
-                              )
-                            }
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
+                      No variants added.
                     </Box>
-                  )
-                )
-              )}
-            </Box>
-          </Box>
+                  ) : (
+                    variants.map(
+                      (variant) => (
+                        <Box
+                          key={
+                            variant.id
+                          }
+                          sx={{
+                            display:
+                              "grid",
+                            gridTemplateColumns:
+                              "1.2fr 1fr 1fr 1fr 1fr 1fr 110px",
+                            gap: 1,
+                            alignItems:
+                              "center",
+                            px: 1,
+                            py: 1,
+                            borderBottom:
+                              "1px solid #e2e8f0",
+                            fontSize: 13,
+                          }}
+                        >
+                          <Box>
+                            {
+                              getColorName(
+                                variant.color_id
+                              )
+                            }
+                          </Box>
+
+                          <Box>
+                            {
+                              getSizeName(
+                                variant.size_id
+                              )
+                            }
+                          </Box>
+
+                          <Box>
+                            {
+                              getUnitName(
+                                variant.unit_id
+                              )
+                            }
+                          </Box>
+
+                          <Box>
+                            ₹
+                            {Number(
+                              variant.mrp ||
+                                0
+                            ).toFixed(2)}
+                          </Box>
+
+                          <Box>
+                            ₹
+                            {Number(
+                              variant.rate ||
+                                0
+                            ).toFixed(2)}
+                          </Box>
+
+                          <Box>
+                            {variant.stock ??
+                              0}
+                          </Box>
+
+                          <Box
+                            sx={{
+                              display:
+                                "flex",
+                              gap: 0.25,
+                            }}
+                          >
+                            <Tooltip title="Edit Variant">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() =>
+                                  handleEditVariant(
+                                    variant
+                                  )
+                                }
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Delete Variant">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() =>
+                                  handleDeleteVariant(
+                                    variant
+                                  )
+                                }
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+                      )
+                    )
+                  )}
+                </Box>
+              </Box>
+            </>
+          )}
         </DialogContent>
 
         <DialogActions>
@@ -2394,8 +2211,8 @@ export default function ProductPage() {
             }
             disabled={
               saving ||
-              variantSaving ||
-              uploadingImage
+              uploadingImage ||
+              variantSaving
             }
           >
             Close
@@ -2430,7 +2247,7 @@ export default function ProductPage() {
 
       <Snackbar
         open={Boolean(success)}
-        autoHideDuration={3500}
+        autoHideDuration={3000}
         onClose={() =>
           setSuccess("")
         }
